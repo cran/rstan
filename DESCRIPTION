@@ -1,32 +1,37 @@
 Package: rstan
 Type: Package
 Title: R Interface to Stan
-Version: 2.7.0-1
-Date: 2015-07-17
+Version: 2.8.0
+Date: 2015-09-19
 Authors@R: c(person("Jiqiang", "Guo", email = "guojq28@gmail.com", role = "aut"),
              person("Daniel", "Lee", role = "ctb"),
+             person("Krzysztof", "Sakrejda", role = "ctb"),
+             person("Jonah", "Gabry", role = "aut"),
              person("Ben", "Goodrich", email = "benjamin.goodrich@columbia.edu", role = c("cre", "aut")),
-             person("Joel", "de Guzman", role = "ctb"),
-             person("Eric", "Niebler", role = "ctb"),
-             person("Thomas", "Heller", role = "ctb"),
-             person("John", "Fletcher", role = "ctb"))
+             person("Joel", "de Guzman", role = "cph", comment = "Boost"),
+             person("Eric", "Niebler", role = "cph",   comment = "Boost"),
+             person("Thomas", "Heller", role = "cph",  comment = "Boost"),
+             person("John", "Fletcher", role = "cph",  comment = "Boost"))
 Description: User-facing R functions are provided by this package to parse, compile, test, estimate, and analyze Stan models by accessing the header-only Stan library provided by the 'StanHeaders' package. The Stan project develops a probabilistic programming language that implements full Bayesian statistical inference via Markov Chain Monte Carlo and (optionally penalized) maximum likelihood estimation via optimization. In both cases, automatic differentiation is used to quickly and accurately evaluate gradients without burdening the user with the need to derive the partial derivatives.
 License: GPL (>= 3)
 NeedsCompilation: yes
-Imports: stats4
-Depends: R (>= 3.0.2), Rcpp (>= 0.11.0), utils, inline, methods
-LinkingTo: Rcpp, RcppEigen, BH (>= 1.58), StanHeaders (>= 2.7.0)
-Suggests: RUnit, RcppEigen, BH (>= 1.58), StanHeaders (>= 2.7.0),
-        parallel, KernSmooth, RCurl, loo
-URL: http://mc-stan.org
-Packaged: 2015-07-17 18:12:01 UTC; goodrich
+Imports: stats4, inline, gridExtra (>= 2.0.0)
+Depends: R (>= 3.0.2), Rcpp (>= 0.11.0), methods, ggplot2 (>= 1.0.0)
+LinkingTo: Rcpp, RcppEigen, BH (>= 1.58), StanHeaders (>= 2.8.0)
+Suggests: RUnit, RcppEigen, BH (>= 1.58), StanHeaders (>= 2.8.0),
+        parallel, KernSmooth, RCurl, loo, rstudioapi, Matrix
+URL: https://groups.google.com/forum/#!forum/stan-users,
+        http://mc-stan.org
+Packaged: 2015-09-19 14:48:38 UTC; goodrich
 Author: Jiqiang Guo [aut],
   Daniel Lee [ctb],
+  Krzysztof Sakrejda [ctb],
+  Jonah Gabry [aut],
   Ben Goodrich [cre, aut],
-  Joel de Guzman [ctb],
-  Eric Niebler [ctb],
-  Thomas Heller [ctb],
-  John Fletcher [ctb]
+  Joel de Guzman [cph] (Boost),
+  Eric Niebler [cph] (Boost),
+  Thomas Heller [cph] (Boost),
+  John Fletcher [cph] (Boost)
 Maintainer: Ben Goodrich <benjamin.goodrich@columbia.edu>
 Repository: CRAN
-Date/Publication: 2015-07-18 17:00:30
+Date/Publication: 2015-09-19 19:50:34

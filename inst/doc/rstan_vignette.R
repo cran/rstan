@@ -46,10 +46,10 @@ schools_data <-
 J <- 8
 y <- c(28,  8, -3,  7, -1,  1, 18, 12)
 sigma <- c(15, 10, 16, 11,  9, 11, 10, 18)
-
-fit1 <- stan(file="schools.stan", 
+library(rstan)
+fit1 <- stan(file="schools.stan",
              # better to add explicitly include: data=schools_data, 
-             iter=2000, chains=4, cores=2)
+             iter=2000, chains=4, cores=1)
 
 
 ###################################################
@@ -124,7 +124,9 @@ ocode <- "
 sm <- stan_model(model_code = ocode)
 y2 <- rnorm(20)
 mean(y2)
-op <- optimizing(sm, data = list(y = y2, N = length(y2)), hessian = TRUE)
+op <- ifelse(grepl('SunOS',Sys.info()['sysname']),
+  "This may not work on Solaris",
+  optimizing(sm, data = list(y = y2, N = length(y2)), hessian = TRUE))
 print(op)
 
 

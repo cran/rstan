@@ -58,6 +58,8 @@
 #include <stan/optimization/newton.hpp>
 #include <stan/optimization/bfgs.hpp>
 
+#include <stan/variational/advi.hpp>
+
 #include <stan/services/io/do_print.hpp>
 #include <stan/services/io/write_error_msg.hpp>
 #include <stan/services/io/write_iteration.hpp>
@@ -89,18 +91,18 @@
 // void R_CheckUserInterrupt(void);
 
 
-// REF: stan/services/command.hpp
+// REF: cmdstan: src/cmdstan/command.hpp
 
 #include <stan/io/mcmc_writer.hpp>
-#include <stan/interface/recorder/csv.hpp>
-#include <stan/interface/recorder/filtered_values.hpp>
-#include <stan/interface/recorder/messages.hpp>
-#include <stan/interface/recorder/noop.hpp>
-#include <stan/interface/recorder/recorder.hpp>
-#include <stan/interface/recorder/sum_values.hpp>
-#include <stan/interface/recorder/values.hpp>
+#include <stan/interface_callbacks/writer/csv.hpp>
+#include <stan/interface_callbacks/writer/filtered_values.hpp>
+#include <stan/interface_callbacks/writer/messages.hpp>
+#include <stan/interface_callbacks/writer/noop.hpp>
+#include <stan/interface_callbacks/writer/base_writer.hpp>
+#include <stan/interface_callbacks/writer/sum_values.hpp>
+#include <stan/interface_callbacks/writer/values.hpp>
 //#include <stan/services/mcmc.hpp>
-#include <rstan/rstan_recorder.hpp>
+#include <rstan/rstan_writer.hpp>
 
 namespace rstan {
 
@@ -362,6 +364,12 @@ namespace rstan {
       o << std::endl;
     }
 
+    void write_stan_version_as_comment(std::ostream& output) {
+       write_comment_property(output,"stan_version_major",stan::MAJOR_VERSION);
+       write_comment_property(output,"stan_version_minor",stan::MINOR_VERSION);
+       write_comment_property(output,"stan_version_patch",stan::PATCH_VERSION);
+    }
+
     /**
      * Cast a size_t vector to an unsigned int vector.
      * The reason is that first Rcpp::wrap/as does not
@@ -459,13 +467,13 @@ namespace rstan {
     };
 
     // in:  model, s, sampler_ptr
-    // out: sample_recorder_size, diagnostic_recorder_size
+    // out: sample_writer_size, diagnostic_writer_size
     template <class Model>
     void calculate_sizes(Model& model,
                          stan::mcmc::sample& s,
                          stan::mcmc::base_mcmc* sampler_ptr,
-                         size_t& sample_recorder_size,
-                         size_t& sample_recorder_offset,
+                         size_t& sample_writer_size,
+                         size_t& sample_writer_offset,
                          std::vector<std::string>& sample_names,
                          std::vector<std::string>& sampler_names,
                          std::vector<std::string>& model_constrained_param_names,
@@ -482,9 +490,9 @@ namespace rstan {
       sampler_ptr->get_sampler_diagnostic_names(model_unconstrained_param_names,
                                                 sampler_diagnostic_names);
 
-      sample_recorder_size = sample_names.size() + sampler_names.size()
+      sample_writer_size = sample_names.size() + sampler_names.size()
         + model_constrained_param_names.size();
-      sample_recorder_offset = sample_names.size() + sampler_names.size();
+      sample_writer_offset = sample_names.size() + sampler_names.size();
     }
 
 
@@ -497,15 +505,15 @@ namespace rstan {
                           std::fstream& sample_stream,
                           std::fstream& diagnostic_stream,
                           const std::vector<std::string>& fnames_oi, RNG_t& base_rng) {
-      size_t sample_recorder_size, sample_recorder_offset;
+      size_t sample_writer_size, sample_writer_offset;
       std::vector<std::string> sample_names;
       std::vector<std::string> sampler_names;
       std::vector<std::string> model_constrained_param_names;
       std::vector<std::string> model_unconstrained_param_names;
       std::vector<std::string> sampler_diagnostic_names;
       rstan::calculate_sizes(model, s, sampler_ptr,
-                             sample_recorder_size,
-                             sample_recorder_offset,
+                             sample_writer_size,
+                             sample_writer_offset,
                              sample_names,
                              sampler_names,
                              model_constrained_param_names,
@@ -513,23 +521,23 @@ namespace rstan {
                              sampler_diagnostic_names);
 
 
-      rstan_sample_recorder sample_recorder
-        = sample_recorder_factory(&sample_stream, "# ",
-                                  sample_recorder_size,
+      rstan_sample_writer sample_writer
+        = sample_writer_factory(&sample_stream, "# ",
+                                  sample_writer_size,
                                   args.get_ctrl_sampling_iter_save(),
                                   args.get_ctrl_sampling_iter_save() - args.get_ctrl_sampling_iter_save_wo_warmup(),
-                                  sample_recorder_offset,
+                                  sample_writer_offset,
                                   qoi_idx);
 
-      stan::interface::recorder::csv diagnostic_recorder
-        = diagnostic_recorder_factory(&diagnostic_stream, "# ");
+      stan::interface_callbacks::writer::csv diagnostic_writer
+        = diagnostic_writer_factory(&diagnostic_stream, "# ");
 
-      stan::interface::recorder::messages message_recorder(&Rcpp::Rcout, "# ");
+      stan::interface_callbacks::writer::messages message_writer(&Rcpp::Rcout, "# ");
 
       stan::io::mcmc_writer<Model,
-                            rstan_sample_recorder, stan::interface::recorder::csv,
-                            stan::interface::recorder::messages>
-        writer(sample_recorder, diagnostic_recorder, message_recorder, &Rcpp::Rcout);
+                            rstan_sample_writer, stan::interface_callbacks::writer::csv,
+                            stan::interface_callbacks::writer::messages>
+        writer(sample_writer, diagnostic_writer, message_writer, &Rcpp::Rcout);
 
       if (!args.get_append_samples()) {
         writer.write_sample_names(s, sampler_ptr, model);
@@ -563,7 +571,7 @@ namespace rstan {
         writer.write_adapt_finish(sampler_ptr);
 
         std::stringstream ss;
-        stan::interface::recorder::messages info(&ss, "# ");
+        stan::interface_callbacks::writer::messages info(&ss, "# ");
         writer.write_adapt_finish(sampler_ptr, info);
         adaptation_info = ss.str();
         adaptation_info = adaptation_info.substr(0, adaptation_info.length()-1);
@@ -593,9 +601,9 @@ namespace rstan {
 
       if (args.get_ctrl_sampling_iter_save_wo_warmup() > 0) {
         double inverse_saved = 1.0 / args.get_ctrl_sampling_iter_save_wo_warmup();
-        mean_lp = sample_recorder.sum_.sum()[0] * inverse_saved;
+        mean_lp = sample_writer.sum_.sum()[0] * inverse_saved;
         for (size_t n = 0; n < mean_pars.size(); n++) {
-          mean_pars[n] = sample_recorder.sum_.sum()[sample_recorder_offset + n] * inverse_saved;
+          mean_pars[n] = sample_writer.sum_.sum()[sample_writer_offset + n] * inverse_saved;
         }
       }
 
@@ -609,8 +617,8 @@ namespace rstan {
       if (args.get_diagnostic_file_flag())
         diagnostic_stream.close();
 
-      holder = Rcpp::List(sample_recorder.values_.x().begin(),
-                          sample_recorder.values_.x().end());
+      holder = Rcpp::List(sample_writer.values_.x().begin(),
+                          sample_writer.values_.x().end());
       holder.attr("test_grad") = Rcpp::wrap(false);
       holder.attr("args") = args.stan_args_to_rlist();
       holder.attr("inits") = initv;
@@ -621,8 +629,8 @@ namespace rstan {
         Rcpp::NumericVector::create(Rcpp::_["warmup"] = warmDeltaT,
                                     Rcpp::_["sample"] = sampleDeltaT);
 
-      Rcpp::List slst(sample_recorder.sampler_values_.x().begin()+1,
-                      sample_recorder.sampler_values_.x().end());
+      Rcpp::List slst(sample_writer.sampler_values_.x().begin()+1,
+                      sample_writer.sampler_values_.x().end());
       std::vector<std::string> slst_names(sample_names.begin()+1, sample_names.end());
       slst_names.insert(slst_names.end(), sampler_names.begin(), sampler_names.end());
       slst.names() = slst_names;
@@ -721,6 +729,110 @@ namespace rstan {
         sample_stream.open(args.get_sample_file().c_str(), samples_append_mode);
       }
 
+      if (VARIATIONAL == args.get_method()) {
+        int grad_samples = args.get_ctrl_variational_grad_samples();
+        int elbo_samples = args.get_ctrl_variational_elbo_samples();
+        int max_iterations = args.get_iter();
+        double tol_rel_obj = args.get_ctrl_variational_tol_rel_obj();
+        double eta_adagrad = args.get_ctrl_variational_eta_adagrad();
+        int eval_elbo = args.get_ctrl_variational_eval_elbo();
+        int output_samples = args.get_ctrl_variational_output_samples();
+        if (args.get_sample_file_flag()) {
+          write_comment(sample_stream,"Sample generated by Stan (Variational Bayes)");
+          write_stan_version_as_comment(sample_stream);
+          args.write_args_as_comment(sample_stream);
+        }
+        if (args.get_diagnostic_file_flag()) {
+          write_comment(diagnostic_stream,"Sample generated by Stan (Variational Bayes)");
+          write_stan_version_as_comment(sample_stream);
+          args.write_args_as_comment(diagnostic_stream);
+        }
+
+        clock_t start_check = clock();
+
+        double init_log_prob;
+        Eigen::VectorXd init_grad
+          = Eigen::VectorXd::Zero(model.num_params_r());
+
+        stan::model::gradient(model, cont_params, init_log_prob,
+                              init_grad, &rstan::io::rcout);
+
+        clock_t end_check = clock();
+        double deltaT
+          = static_cast<double>(end_check - start_check) / CLOCKS_PER_SEC;
+
+        rstan::io::rcout << std::endl;
+        rstan::io::rcout << "This is Automatic Differentiation Variational Inference.";
+        rstan::io::rcout << std::endl;
+
+        rstan::io::rcout << std::endl;
+        rstan::io::rcout << "(EXPERIMENTAL ALGORITHM: expect frequent updates to the"
+                         << " procedure.)";
+        rstan::io::rcout << std::endl;
+
+        rstan::io::rcout << std::endl;
+        rstan::io::rcout << "Gradient evaluation took " << deltaT
+                         << " seconds" << std::endl;
+        rstan::io::rcout << "1000 iterations under these settings should take "
+                         << 1e3 * grad_samples * deltaT << " seconds." << std::endl;
+        rstan::io::rcout << "Adjust your expectations accordingly!";
+        rstan::io::rcout << std::endl;
+        rstan::io::rcout << std::endl;
+
+        if (args.get_ctrl_variational_algorithm() == FULLRANK) {
+          if (args.get_sample_file_flag()) {
+            std::vector<std::string> names;
+            names.push_back("lp__");
+            model.constrained_param_names(names, true, true);
+            print_vector(names, sample_stream);
+          }
+
+          stan::variational::advi<Model,
+                                  stan::variational::normal_fullrank,
+                                  RNG_t>
+            cmd_advi(model,
+                     cont_params,
+                     grad_samples,
+                     elbo_samples,
+                     eta_adagrad,
+                     base_rng,
+                     eval_elbo,
+                     output_samples,
+                     &rstan::io::rcout,
+                     &sample_stream,
+                     &diagnostic_stream);
+          cmd_advi.run(tol_rel_obj, max_iterations);
+        }
+
+        if (args.get_ctrl_variational_algorithm() == MEANFIELD) {
+          if (args.get_sample_file_flag()) {
+            std::vector<std::string> names;
+            names.push_back("lp__");
+            model.constrained_param_names(names, true, true);
+            print_vector(names, sample_stream);
+          }
+
+          stan::variational::advi<Model,
+                                  stan::variational::normal_meanfield,
+                                  RNG_t>
+            cmd_advi(model,
+                     cont_params,
+                     grad_samples,
+                     elbo_samples,
+                     eta_adagrad,
+                     base_rng,
+                     eval_elbo,
+                     output_samples,
+                     &rstan::io::rcout,
+                     &sample_stream,
+                     &diagnostic_stream);
+          cmd_advi.run(tol_rel_obj, max_iterations);
+        }
+        holder = Rcpp::List::create(Rcpp::_["samples"] = R_NilValue);
+        holder.attr("args") = args.stan_args_to_rlist();
+        return 0;
+      }
+
       if (OPTIM == args.get_method()) { // point estimation
         if (LBFGS == args.get_ctrl_optim_algorithm()) {
           rstan::io::rcout << "STAN OPTIMIZATION COMMAND (LBFGS)" << std::endl;
@@ -758,7 +870,7 @@ namespace rstan {
             std::vector<std::string> names;
             names.push_back("lp__");
             model.constrained_param_names(names);
-            print_vector(names, sample_stream); 
+            print_vector(names, sample_stream);
           }
 
           double lp(0);
@@ -826,7 +938,7 @@ namespace rstan {
             std::vector<std::string> names;
             names.push_back("lp__");
             model.constrained_param_names(names);
-            print_vector(names, sample_stream); 
+            print_vector(names, sample_stream);
           }
           double lp(0);
           bool save_iterations = args.get_ctrl_optim_save_iterations();
@@ -872,7 +984,7 @@ namespace rstan {
             std::vector<std::string> names;
             names.push_back("lp__");
             model.constrained_param_names(names);
-            print_vector(names, sample_stream); 
+            print_vector(names, sample_stream);
           }
           std::vector<double> gradient;
           double lp = stan::model::log_prob_grad<true,true>(model, cont_vector, disc_vector, gradient);
@@ -919,17 +1031,13 @@ namespace rstan {
         diagnostic_stream.open(args.get_diagnostic_file().c_str(), std::fstream::out);
 
       if (args.get_sample_file_flag()) {
-        write_comment(sample_stream,"Samples Generated by Stan");
-        write_comment_property(sample_stream,"stan_version_major",stan::MAJOR_VERSION);
-        write_comment_property(sample_stream,"stan_version_minor",stan::MINOR_VERSION);
-        write_comment_property(sample_stream,"stan_version_patch",stan::PATCH_VERSION);
+        write_comment(sample_stream,"Sample generated by Stan");
+        write_stan_version_as_comment(sample_stream);
         args.write_args_as_comment(sample_stream);
       }
       if (args.get_diagnostic_file_flag()) {
-        write_comment(diagnostic_stream,"Samples Generated by Stan");
-        write_comment_property(diagnostic_stream,"stan_version_major",stan::MAJOR_VERSION);
-        write_comment_property(diagnostic_stream,"stan_version_minor",stan::MINOR_VERSION);
-        write_comment_property(diagnostic_stream,"stan_version_patch",stan::PATCH_VERSION);
+        write_comment(diagnostic_stream,"Sample generated by Stan");
+        write_stan_version_as_comment(sample_stream);
         args.write_args_as_comment(diagnostic_stream);
       }
 

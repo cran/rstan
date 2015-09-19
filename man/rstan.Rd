@@ -14,8 +14,8 @@
   \tabular{ll}{
     Package: \tab rstan\cr
     Type: \tab Package\cr
-    Version: \tab 2.7.0\cr
-    Date: \tab Jul 17, 2015\cr
+    Version: \tab 2.8.0\cr
+    Date: \tab Sep 16, 2015\cr
     License: \tab GPL-3 \cr
   }
 
@@ -32,7 +32,7 @@
   } 
 
   \tabular{ll}{
-  Maintainer:\tab Jiqiang Guo <benjamin.goodrich@columbia.edu>    \cr
+  Maintainer:\tab Ben Goodrich <benjamin.goodrich@columbia.edu>    \cr
   } 
 }
 \references{

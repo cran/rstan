@@ -18,27 +18,40 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 pairs.stanfit <-
-  function (x, labels = NULL, panel = NULL, ..., 
+  function (x, labels = NULL, panel = NULL, ...,
             lower.panel = NULL, upper.panel = NULL, diag.panel = NULL, 
-            text.panel = NULL, label.pos = 0.5 + has.diag/3, 
-            cex.labels = NULL, font.labels = 1, row1attop = TRUE, gap = 1, 
+            text.panel = NULL, label.pos = 0.5 + 1/3, 
+            cex.labels = NULL, font.labels = 1, 
+            row1attop = TRUE, gap = 1, log = "",
             pars = NULL, condition = "accept_stat__", include = TRUE) {
     
     if(is.null(pars)) pars <- dimnames(x)[[3]]
     else if (!include) pars <- setdiff(x@sim$pars_oi, pars)
-    arr <- extract(x, pars = pars, permuted = FALSE)
+    arr <- round(extract(x, pars = pars, permuted = FALSE), digits = 12)
     sims <- nrow(arr)
     chains <- ncol(arr)
+    varying <- apply(arr, 3, FUN = function(y) length(unique(y)) > 1)
+    if (any(!varying)) {
+      message("the following parameters were dropped because they are constant\n",
+              paste(names(varying)[!varying], collapse = " "))
+      arr <- arr[,,varying,drop = FALSE]
+    }
+    dupes <- duplicated(arr, MARGIN = 3)
+    if (any(dupes)) {
+      message("the following parameters were dropped because they are dupiclative\n",
+              paste(dimnames(arr)[[3]][dupes], collapse = " "))
+      arr <- arr[,,!dupes,drop = FALSE]
+    }
     gsp <- get_sampler_params(x, inc_warmup = FALSE)
     n_divergent__ <- matrix(c(sapply(gsp, FUN = function(y) y[,"n_divergent__"])), 
                             nrow = sims * chains, ncol = dim(arr)[3])
     max_td <- x@stan_args[[1]]$control
-    if (is.null(max_td)) max_td <- 11
+    if (is.null(max_td)) max_td <- 10
     else {
       max_td <- max_td$max_treedepth
-      if (is.null(max_td)) max_td <- 11
+      if (is.null(max_td)) max_td <- 10
     }
-    hit <- matrix(c(sapply(gsp, FUN = function(y) y[,"treedepth__"] == max_td)), 
+    hit <- matrix(c(sapply(gsp, FUN = function(y) y[,"treedepth__"] > max_td)), 
                     nrow = sims * chains, ncol = dim(arr)[3])
     
     if(is.list(condition)) {
@@ -81,7 +94,19 @@ pairs.stanfit <-
     }
     
     x <- apply(arr, MARGIN = "parameters", FUN = function(y) y)
+    nc <- ncol(x)
     
+    if (isTRUE(log)) {
+      xl <- apply(x >= 0, 2, FUN = all)
+      xl["lp__"] <- FALSE
+    }
+    else if (is.numeric(log)) xl <- log
+    else xl <- grepl("x", log)
+
+    if (is.numeric(xl) || any(xl)) {
+      x[,xl] <- log(x[,xl])
+      colnames(x)[xl] <- paste("log", colnames(x)[xl], sep = "-")
+    }
     if(is.null(lower.panel)) {
       if(!is.null(panel)) lower.panel <- panel
       else lower.panel <- function(x,y, ...) {
@@ -116,8 +141,9 @@ pairs.stanfit <-
         usr <- par("usr"); on.exit(par(usr))
         par(usr = c(usr[1:2], 0, 1.5) )
         h <- hist(x, plot = FALSE)
-        breaks <- h$breaks; nB <- length(breaks)
+        breaks <- h$breaks
         y <- h$counts; y <- y/max(y)
+        nB <- length(breaks)
         rect(breaks[-nB], 0, breaks[-1], y, col="cyan", ...)
     }
     if(is.null(panel)) panel <- points
@@ -126,7 +152,6 @@ pairs.stanfit <-
       text(x,y, txt, cex = cex, font = font)
     }
     else textPanel <- text.panel
-    has.diag <- TRUE
     if(is.null(labels)) labels <- colnames(x)
 
     mc <- match.call(expand.dots = FALSE)
@@ -138,6 +163,7 @@ pairs.stanfit <-
     mc$upper.panel <- upper.panel
     mc$diag.panel <- diag.panel
     mc$text.panel <- textPanel
+    mc$log <- ""
     mc$condition <- NULL
     mc$pars <- NULL
     mc$include <- NULL

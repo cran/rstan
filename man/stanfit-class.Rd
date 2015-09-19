@@ -25,7 +25,7 @@
 \alias{get_elapsed_time,stanfit-method}
 \alias{get_inits,stanfit-method}
 \alias{get_logposterior} 
-\alias{get_logposterior,stanfit,logical-method}
+\alias{get_logposterior,stanfit-method}
 \alias{get_adaptation_info} 
 \alias{get_adaptation_info,stanfit-method}
 \alias{get_sampler_params}
@@ -68,12 +68,14 @@
 }
 
 \usage{
-  As.mcmc.list(object, pars, ...)
+  As.mcmc.list(object, pars, include = TRUE, ...)
 }
 
 \arguments{
   \item{object}{object of class \code{"stanfit"}}
   \item{pars}{optional character vector of parameters to include}
+  \item{include}{logical scalar indicating whether to include (the default) or 
+    exclude theh parameters named in \code{pars}}
   \item{\dots}{unused}
 }
 \section{Slots}{

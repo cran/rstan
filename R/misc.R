@@ -742,7 +742,10 @@ seq_array_ind <- function(d, col_major = FALSE) {
   if (length(d) == 0L)
     return(numeric(0L)) 
 
-  total <- prod(d) 
+  total <- prod(d)
+  if (total == 0L)
+    return(array(0L, dim = 0L))
+  
   len <- length(d) 
   if (len == 1L)
     return(array(1:total, dim = c(total, 1)))
@@ -901,16 +904,20 @@ pars_total_indexes <- function(names, dims, fnames, pars) {
       attr(p, "row_major_idx") <- p 
       return(p) 
     } 
-    p <- match(par, names) 
-    idx <- starts[p] + seq(0, by = 1, length.out = num_pars(dims[[p]])) 
+    p <- match(par, names)
+    np <- num_pars(dims[[p]])
+    if (np == 0) return(NULL)
+    idx <- starts[p] + seq(0, by = 1, length.out = np) 
     names(idx) <- fnames[idx] 
     attr(idx, "row_major_idx") <- starts[p] + idx_col2rowm(dims[[p]]) - 1 
     idx
   } 
-  idx <- lapply(pars, FUN = par_total_indexes) 
-  names(idx) <- pars 
-  idx 
-} 
+  idx <- lapply(pars, FUN = par_total_indexes)
+  nulls <- sapply(idx, is.null)
+  idx <- idx[!nulls]
+  names(idx) <- pars[!nulls] 
+  idx
+}
 
 rstancolgrey <- rgb(matrix(c(247, 247, 247, 204, 204, 204, 150, 150, 150, 82, 82, 82),  
                            byrow = TRUE, ncol = 3), 
@@ -1541,8 +1548,15 @@ parse_data <- function(cppcode, e = parent.frame()) {
   # pull out object names from the data block
   objects <- gsub("^.* ([0-9A-Za-z_]+).*;.*$", "\\1",
                   cppcode[private:public])
+  tdata <- grep("stan::math::fill(", cppcode, value = TRUE, fixed = TRUE)
+  tdata <- gsub("^.*stan::math::fill\\((.*),DUMMY_VAR__\\);$", "\\1", tdata)
   # get them from the calling environment
-  mget(objects, envir = e, inherits = TRUE,
+  objects <- setdiff(objects, tdata)
+  modes <- rep("any", length(objects))
+  names(modes) <- objects
+  if ("T" %in% objects) modes["T"] <- "numeric"
+  if ("F" %in% objects) modes["F"] <- "numeric"
+  mget(objects, envir = e, inherits = TRUE, mode = modes,
        ifnotfound = vector("list", length(objects)))
 }
 
@@ -1559,4 +1573,44 @@ get_stan_param_names <- function(object) {
   params <- intersect(params, object@sim$pars_oi)
   stopifnot(length(params) > 0)
   return(params)
+}
+
+create_progress_html_file <- function(htmlfname, textfname) {
+  # Args:
+  #   htmlfname: the HTML file name
+  #   textfname: the text file name
+  template_file <- file.path(system.file('misc', package = 'rstan'), 'stan_progress.html')
+  src <- paste(readLines(template_file), collapse = '\n')
+  src2 <- sub("%filename%", textfname, sub("%title%", textfname, src, fixed = TRUE), fixed = TRUE) 
+  cat(src2, file = htmlfname)
+}
+
+throw_sampler_warnings <- function(object) {
+  if (!is(object, "stanfit"))
+    stop("'object' must be of class 'stanfit'")
+  sp <- get_sampler_params(object, inc_warmup = FALSE)
+  n_d <- sum(sapply(sp, FUN = function(x) {
+    if ("n_divergent__" %in% colnames(x)) return(sum(x[,"n_divergent__"]))
+    else return(0)
+  }))
+  if (n_d > 0)
+    warning("There were ", n_d, " divergent transitions after warmup.",
+            " Increasing adapt_delta may help.", call. = FALSE)
+  max_td <- object@stan_args[[1]]$control
+  if (is.null(max_td)) max_td <- 10
+  else {
+    max_td <- max_td$max_treedepth
+    if (is.null(max_td)) max_td <- 10
+  }
+  n_m <- sum(sapply(sp, FUN = function(x) {
+    if ("treedepth__" %in% colnames(x)) return(sum(x[,"treedepth__"] > max_td))
+    else return(0)
+  }))
+  if (n_m > 0)
+    warning("There were ", n_m,
+            " transitions after warmup that exceeded the maximum treedepth.",
+            " Increase max_treedepth.", call. = FALSE)
+  if (n_d > 0 || n_m > 0) warning("Examine the pairs() plot to diagnose sampling problems\n",
+                                  call. = FALSE, noBreaks. = TRUE)
+  return(invisible(NULL))
 }

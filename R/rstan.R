@@ -48,6 +48,7 @@ stan_model <- function(file,
       file <- file.path(dirname(tf), paste0(tools::md5sum(tf), ".stan"))
       if(!file.exists(file)) file.rename(from = tf, to = file)
     }
+    else file <- normalizePath(file)
     
     stanc_ret <- stanc(file = file, model_code = model_code, 
                        model_name = model_name, verbose, ...)
@@ -76,9 +77,10 @@ stan_model <- function(file,
     if (!file.exists(file.rda)) {
       file.rda <- file.path(tempdir(), paste0(md5, ".rda"))
     }
-    if( mtime < as.POSIXct(packageDescription("rstan")$Date) ||
-       !file.exists(file.rda) ||
-       file.info(file.rda)$mtime <  mtime ||
+    if(!file.exists(file.rda) ||
+       (mtime.rda <- file.info(file.rda)$mtime) <  mtime ||
+       mtime.rda < as.POSIXct(packageDescription("rstan")$Date) ||
+       mtime.rda > rstan_load_time ||
        !is(obj <- readRDS(file.rda), "stanmodel") ||
        !is_sm_valid(obj) ||
        !is.null(writeLines(obj@model_code, con = tf <- tempfile())) ||
@@ -99,12 +101,15 @@ stan_model <- function(file,
   }
   
   # check for compilers
-  check <- system2(file.path(R.home(component = "bin"), "R"), 
-                   args = "CMD config CXX", 
-                   stdout = TRUE, stderr = FALSE)
-  if(identical(check, "")) {
-    WIKI <- "https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started"
-    warning(paste("C++ compiler not found on system. If absent, see", WIKI))
+  if (.Platform$OS.type == "windows") find_rtools()
+  else {
+    check <- system2(file.path(R.home(component = "bin"), "R"), 
+                     args = "CMD config CXX", 
+                     stdout = TRUE, stderr = FALSE)
+    if(nchar(check) == 0) {
+      WIKI <- "https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started"
+      warning(paste("C++ compiler not found on system. If absent, see", WIKI))
+    }
   }
   
   model_cppname <- stanc_ret$model_cppname 
@@ -116,17 +121,25 @@ stan_model <- function(file,
                get_Rcpp_module_def_code(model_cppname), 
                sep = '')  
 
-  cat("COMPILING THE C++ CODE FOR MODEL '", model_name, "' NOW.\n", sep = '') 
+  if (verbose && interactive())
+    cat("COMPILING THE C++ CODE FOR MODEL '", model_name, "' NOW.\n", sep = '')
   if (verbose) cat(system_info(), "\n")
   if (!is.null(boost_lib)) { 
     old.boost_lib <- rstan_options(boost_lib = boost_lib) 
     on.exit(rstan_options(boost_lib = old.boost_lib)) 
   } 
-
-  if (!is.null(eigen_lib)) { 
+  if (!file.exists(rstan_options("boost_lib")))
+    stop("Boost not found; call install.packages('BH')")
+  
+  if (!is.null(eigen_lib)) {
     old.eigen_lib <- rstan_options(eigen_lib = eigen_lib) 
     on.exit(rstan_options(eigen_lib = old.eigen_lib), add = TRUE) 
   }
+  if (!file.exists(rstan_options("eigen_lib")))
+    stop("Eigen not found; call install.packages('RcppEigen')")
+  
+  if (inc_path_fun("StanHeaders") == "")
+    stop("StanHeaders not found; call install.packages('StanHeaders')")
 
   dso <- cxxfunctionplus(signature(), body = paste(" return Rcpp::wrap(\"", model_name, "\");", sep = ''), 
                          includes = inc, plugin = "rstan", save_dso = save_dso | auto_write,
@@ -212,17 +225,15 @@ stan <- function(file, model_name = "anon_model",
                       pre_msg = "passing unknown arguments: ", 
                       call. = FALSE)
 
+  if (!is.list(data) && !is.environment(data) && !is.character(data))
+    stop("'data' must be a list, environment, or character vector")
+  
   if (is(fit, "stanfit")) sm <- get_stanmodel(fit)
   else { 
     attr(model_code, "model_name2") <- deparse(substitute(model_code))  
     if (missing(model_name)) model_name <- NULL
-    if (cores == 1) {
-      sr <- stanc(file, model_name = model_name, model_code = model_code,
-                  verbose = verbose)
-    }
-    else sr <- NULL
     sm <- stan_model(file, model_name = model_name, 
-                     model_code = model_code, stanc_ret = sr,
+                     model_code = model_code, stanc_ret = NULL,
                      boost_lib = boost_lib, eigen_lib = eigen_lib, 
                      save_dso = save_dso, verbose = verbose, ...)
   }
