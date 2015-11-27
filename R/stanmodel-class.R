@@ -415,7 +415,7 @@ setMethod("sampling", "stanmodel",
                 utils::browseURL(paste0("file://", sinkfile_html))
               }
               else if (identical(Sys.getenv("RSTUDIO"), "1") && 
-                       .Platform$OS.type == "windows") {
+                       .Platform$OS.type == "windows" && interactive()) {
                 if (!requireNamespace("rstudioapi"))
                   stop("must install the rstudioapi package when using RStan in parallel via RStudio")
                 if (rstudioapi::isAvailable("0.98.423")) {
@@ -568,13 +568,22 @@ setMethod("sampling", "stanmodel",
                   else message(msg)
                   mat <- as.matrix(tab)
                   colnames(mat) <- "count"
-                  # print(mat)
-                  message(paste(capture.output(print(mat)), collapse = "\n"))
-                  message("When a numerical problem occurs, the Metropolis proposal gets rejected.")
-                  message("However, by design Metropolis proposals sometimes get rejected ", 
-                          "even when there are no numerical problems.")
-                  message("Thus, if the number in the 'count' column is small, ",
-                          "do not ask about this message on stan-users.")
+                  if (.Platform$OS.type == "windows") {
+                    print(mat)
+                    print("When a numerical problem occurs, the Metropolis proposal gets rejected.")
+                    print(paste("However, by design Metropolis proposals sometimes get rejected ", 
+                                "even when there are no numerical problems."))
+                    print(paste("Thus, if the number in the 'count' column is small, ",
+                                "do not ask about this message on stan-users."))
+                  }
+                  else {
+                    message(paste(capture.output(print(mat)), collapse = "\n"))
+                    message("When a numerical problem occurs, the Metropolis proposal gets rejected.")
+                    message("However, by design Metropolis proposals sometimes get rejected ", 
+                            "even when there are no numerical problems.")
+                    message("Thus, if the number in the 'count' column is small, ",
+                            "do not ask about this message on stan-users.")
+                  }
                 }
               }
               samples[[i]] <- samples_i

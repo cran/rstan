@@ -1,8 +1,8 @@
 Package: rstan
 Type: Package
 Title: R Interface to Stan
-Version: 2.8.1
-Date: 2015-11-18
+Version: 2.8.2
+Date: 2015-11-26
 Authors@R: c(person("Jiqiang", "Guo", email = "guojq28@gmail.com", role = "aut"),
              person("Daniel", "Lee", role = "ctb"),
              person("Krzysztof", "Sakrejda", role = "ctb"),
@@ -23,7 +23,7 @@ Suggests: RUnit, RcppEigen, BH (>= 1.58), StanHeaders (>= 2.8.0),
         parallel, KernSmooth, RCurl, loo, rstudioapi, Matrix
 URL: https://groups.google.com/forum/#!forum/stan-users,
         http://mc-stan.org
-Packaged: 2015-11-18 17:18:35 UTC; goodrich
+Packaged: 2015-11-26 15:27:02 UTC; goodrich
 Author: Jiqiang Guo [aut],
   Daniel Lee [ctb],
   Krzysztof Sakrejda [ctb],
@@ -35,4 +35,4 @@ Author: Jiqiang Guo [aut],
   John Fletcher [cph] (Boost)
 Maintainer: Ben Goodrich <benjamin.goodrich@columbia.edu>
 Repository: CRAN
-Date/Publication: 2015-11-19 11:02:33
+Date/Publication: 2015-11-27 08:53:20

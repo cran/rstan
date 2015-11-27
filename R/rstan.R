@@ -24,7 +24,8 @@ stan_model <- function(file,
                        eigen_lib = NULL, 
                        save_dso = TRUE,
                        verbose = FALSE, 
-                       auto_write = rstan_options("auto_write"), ...) { 
+                       auto_write = rstan_options("auto_write"), 
+                       obfuscate_model_name = TRUE) { 
 
   # Construct a stan model from stan code 
   # 
@@ -51,7 +52,8 @@ stan_model <- function(file,
     else file <- normalizePath(file)
     
     stanc_ret <- stanc(file = file, model_code = model_code, 
-                       model_name = model_name, verbose, ...)
+                       model_name = model_name, verbose = verbose,
+                       obfuscate_model_name = obfuscate_model_name)
     
     # find possibly identical stanmodels
     S4_objects <- apropos("^[[:alpha:]]+.*$", mode = "S4")
@@ -78,8 +80,8 @@ stan_model <- function(file,
       file.rda <- file.path(tempdir(), paste0(md5, ".rda"))
     }
     if(!file.exists(file.rda) ||
-       (mtime.rda <- file.info(file.rda)$mtime) <  mtime ||
-       mtime.rda < as.POSIXct(packageDescription("rstan")$Date) ||
+       (mtime.rda <- file.info(file.rda)$mtime) < 
+       as.POSIXct(packageDescription("rstan")$Date) ||
        mtime.rda > rstan_load_time ||
        !is(obj <- readRDS(file.rda), "stanmodel") ||
        !is_sm_valid(obj) ||
@@ -239,7 +241,7 @@ stan <- function(file, model_name = "anon_model",
     sm <- stan_model(file, model_name = model_name, 
                      model_code = model_code, stanc_ret = NULL,
                      boost_lib = boost_lib, eigen_lib = eigen_lib, 
-                     save_dso = save_dso, verbose = verbose, ...)
+                     save_dso = save_dso, verbose = verbose)
   }
 
   if (is.null(sample_file))  sample_file <- NA 
