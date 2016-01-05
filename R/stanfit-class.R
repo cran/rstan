@@ -87,7 +87,7 @@ setMethod("plot", signature(x = "stanfit", y = "missing"),
             else {
               plotters <- paste0("stan_", c("plot", "trace", "scat", "hist", "dens", "ac",
                                             "diag", "rhat", "ess", "mcse", "par"))
-              fun <- grep(plotfun, plotters, value = TRUE)
+              fun <- grep(paste0(plotfun, "$"), plotters, value = TRUE)
               if (!length(fun)) stop("Plotting function not found.")
               else fun <- match.fun(fun)
             }
@@ -320,8 +320,14 @@ setMethod("get_sampler_params",
             ldf <- lapply(object@sim$samples, 
                           function(x) do.call(cbind, attr(x, "sampler_params")))   
             if (all(sapply(ldf, is.null))) return(invisible(NULL))  
-            if (inc_warmup) return(invisible(ldf)) 
-            return(mapply(function(x, w) x[-(1:w), , drop = FALSE], 
+            if (inc_warmup) {
+              if (object@sim$warmup2 == 0)
+                warning("warmup samples not saved")
+              return(invisible(ldf))
+            }
+            else if (all(object@sim$warmup2 == 0)) return(invisible(ldf))
+            return(mapply(function(x, w) 
+              if (w > 0) x[-(1:w), , drop = FALSE] else x, 
                              ldf, object@sim$warmup2, 
                              SIMPLIFY = FALSE, USE.NAMES = FALSE)) 
           }) 
