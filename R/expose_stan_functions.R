@@ -1,5 +1,5 @@
 # This file is part of RStan
-# Copyright (C) 2012, 2013, 2014, 2015 Jiqiang Guo and Benjamin Goodrich
+# Copyright (C) 2012, 2013, 2014, 2015, 2016 Jiqiang Guo and Benjamin Goodrich
 #
 # RStan is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -181,6 +181,10 @@ expose_stan_functions <- function(stanmodel) {
   lines <- gsub("const static bool propto__ = true;",
                 "const static bool propto__ = false;", lines, fixed = TRUE)
   
+  # avoid catch messages that say to report a bug
+  lines <- gsub('"*** IF YOU SEE THIS, PLEASE REPORT A BUG ***"', "e.what()",
+                lines, fixed = TRUE)
+
   # restore Stan's Eigen typedefs that were clobbered by the previous lines
   lines <- sub("typedef vector_d vector_d;", "using stan::math::vector_d;", lines)
   lines <- sub("typedef row_vector_d row_vector_d;", "using stan::math::row_vector_d;", lines)
@@ -189,16 +193,15 @@ expose_stan_functions <- function(stanmodel) {
   # add dependencies
   extras <- dir(rstan_options("boost_lib2"), pattern = "hpp$", 
                 full.names = TRUE, recursive = TRUE)
-  lines <- c("// [[Rcpp::depends(StanHeaders)]]",
-             "// [[Rcpp::depends(BH)]]",
-             "// [[Rcpp::depends(RcppEigen)]]",
-             "#include<Rcpp.h>",
-             "#include<RcppEigen.h>",
+  has_model <- any(grepl("stan::model", lines, fixed = TRUE))
+  lines <- c("// [[Rcpp::depends(rstan)]]",
+             "#include <Rcpp.h>",
+             "#include <RcppEigen.h>",
              if (length(extras) > 0) sapply(extras, FUN = function(x)
                paste0("#include<", x, ">")),             
-             "#include<stan/math.hpp>",
+             "#include <stan/math.hpp>",
              "#include <src/stan/lang/rethrow_located.hpp>",
-
+             if (has_model) "#include <src/stan/model/indexing.hpp>",
              "#include <boost/exception/all.hpp>",
              "#include <boost/random/linear_congruential.hpp>",
              

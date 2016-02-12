@@ -1,5 +1,5 @@
 # This file is part of RStan
-# Copyright (C) 2012, 2013, 2014, 2015 Jiqiang Guo and Benjamin Goodrich
+# Copyright (C) 2012, 2013, 2014, 2015, 2016 Jiqiang Guo and Benjamin Goodrich
 #
 # RStan is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -22,10 +22,26 @@ setMethod("show", "stanmodel",
           }) 
 
 setGeneric(name = 'optimizing',
-           def = function(object, ...) { standardGeneric("optimizing")})
+           def = function(object, ...) {
+             
+             if (is.sparc()) {
+               msg <- "optimizing() will likely crash on SPARC."
+               if (interactive()) stop(msg, " Run in batch mode to test.")
+               else message(msg)
+             }
+             standardGeneric("optimizing")
+})
 
 setGeneric(name = 'vb',
-           def = function(object, ...) { standardGeneric("vb")})
+           def = function(object, ...) { 
+             
+             if (is.sparc()) {
+               msg <- "vb() will likely crash on SPARC."
+               if (interactive()) stop(msg, " Run in batch mode to test.")
+               else message(msg)
+             }
+             standardGeneric("vb")
+})
 
 setGeneric(name = "sampling",
            def = function(object, ...) { standardGeneric("sampling")})
@@ -84,6 +100,7 @@ mk_cppmodule <- function(object) {
 setMethod("vb", "stanmodel", 
           function(object, data = list(), pars = NA, include = TRUE,
                    seed = sample.int(.Machine$integer.max, 1),
+                   init = 'random',
                    check_data = TRUE, sample_file = tempfile(fileext = '.csv'),
                    algorithm = c("meanfield", "fullrank"), ...) {
             stan_fit_cpp_module <- object@mk_cppmodule(object)
@@ -125,10 +142,16 @@ setMethod("vb", "stanmodel",
               message('failed to create the model; variational Bayes not done')
               return(invisible(new_empty_stanfit(object)))
             }
+            if (is.numeric(init)) init <- as.character(init)
+            if (is.function(init)) init <- init()
+            if (!is.list(init) && !is.character(init)) {
+              message("wrong specification of initial values")
+              return(invisible(new_empty_stanfit(object)))
+            }
             seed <- check_seed(seed, warn = 1)
             if (is.null(seed))
               return(invisible(list(stanmodel = object)))
-            args <- list(seed = seed, chain_id = 1L,
+            args <- list(init = init, seed = seed, chain_id = 1L,
                          method = "variational",
                          algorithm = match.arg(algorithm))
 
@@ -172,31 +195,35 @@ setMethod("vb", "stanmodel",
             else pars <- m_pars
 
             skeleton <- create_skeleton(m_pars, p_dims)
-            cC <- unlist(sapply(names(skeleton), simplify = FALSE, FUN = function(x) {
+            cC <- sapply(names(skeleton), simplify = FALSE, FUN = function(x) {
               param <- skeleton[[x]]
               if (x == "lp__") TRUE
               else if (x %in% pars) rep(TRUE, length(param))
               else rep(FALSE, length(param))
-            }))
+            })
 
             vbres <- sampler$call_sampler(c(args, dotlist))
             samples <- read_one_stan_csv(attr(vbres, "args")$sample_file)
             means <- sapply(samples, mean)
-            means <- as.matrix(c(means[-1], "lp__" = means[1]))
+            means <- as.matrix(c(means[-1], means[1]))
             colnames(means) <- "chain:1"
             assign("posterior_mean_4all", means, envir = sfmiscenv)
-            idx_wo_lp <- which(m_pars != "lp__")
-            skeleton <- create_skeleton(m_pars[idx_wo_lp], p_dims[idx_wo_lp])
-            inits_used <- rstan_relist(as.numeric(samples[1,]), skeleton)
-            samples <- cbind(samples[-1,-1,drop=FALSE], "lp__" = samples[-1,1])[,cC]
-            ord <- unlist(sapply(pars, simplify = FALSE, FUN = function(p) {
-              grep(paste0("^", p), colnames(samples))
-            }))
-            samples <- samples[,c(ord, ncol(samples))]
+            inits_used <- rstan_relist(as.numeric(samples[1,]), 
+                                       skeleton[-length(skeleton)])
+            samples <- cbind(samples[-1,-1,drop=FALSE], 
+                             "lp__" = samples[-1,1])[,unlist(cC)]
+            cC <- cC[sapply(cC, all)]
+            count <- 1L
+            for (i in seq_along(cC)) {
+              len <- length(cC[[i]])
+              cC[[i]] <- count:(count + len - 1L)
+              count <- count + len
+            }
+            samples <- samples[,unlist(cC[c(pars, "lp__")]), drop = FALSE]
             fnames_oi <- sampler$param_fnames_oi()
             n_flatnames <- length(fnames_oi)
             iter <- nrow(samples)
-            sim = list(samples = list(as.list(samples)),
+            sim <- list(samples = list(as.list(samples)),
                        iter = iter, thin = 1L,
                        warmup = 0L,
                        chains = 1L,
@@ -419,6 +446,19 @@ setMethod("sampling", "stanmodel",
             mode <- if (!is.null(dots$test_grad) && dots$test_grad) 
               "TESTING GRADIENT" else "SAMPLING"
             
+            if (is.numeric(init)) init <- as.character(init)
+            if (is.function(init)) {
+              if ("chain_id" %in% names(formals(init)))
+                init <- lapply(1:chains, FUN = init)
+              else
+                init <- lapply(1:chains, function(id) init())
+            }
+            if (!is.list(init) && !is.character(init)) {
+              message("wrong specification of initial values")
+              return(invisible(new_empty_stanfit(object)))
+            }
+            if (is.list(list)) init <- lapply(init, function(x) x)
+
             if (cores > 1 && mode == "SAMPLING" && chains > 1) {
               .dotlist <- c(sapply(objects, simplify = FALSE, FUN = get,
                                   envir = environment()), list(...))
@@ -481,7 +521,7 @@ setMethod("sampling", "stanmodel",
               parallel::clusterExport(cl, varlist = ".dotlist", envir = environment())
               data_e <- as.environment(data)
               parallel::clusterExport(cl, varlist = names(data_e), envir = data_e)
-              nfits <- parallel::parLapply(cl, X = 1:chains, fun = callFun)
+              nfits <- parallel::parLapplyLB(cl, X = 1:chains, fun = callFun)
               valid <- sapply(nfits, is, class2 = "stanfit") &
                        sapply(nfits, FUN = function(x) x@mode == 0)
               if(all(valid)) {

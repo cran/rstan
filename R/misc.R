@@ -1,5 +1,5 @@
 # This file is part of RStan
-# Copyright (C) 2012, 2013, 2014, 2015 Jiqiang Guo and Benjamin Goodrich
+# Copyright (C) 2012, 2013, 2014, 2015, 2016 Jiqiang Guo and Benjamin Goodrich
 #
 # RStan is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -1621,3 +1621,14 @@ throw_sampler_warnings <- function(object) {
                                   call. = FALSE, noBreaks. = TRUE)
   return(invisible(NULL))
 }
+
+get_CXX <- function(CXX11 = FALSE) {
+  system2(file.path(R.home(component = "bin"), "R"), 
+          args = paste("CMD config", ifelse(CXX11, "CXX11", "CXX")), 
+          stdout = TRUE, stderr = FALSE)
+}
+
+is.sparc <- function() {
+  grepl("^sparc",  R.version$platform)
+}
+             

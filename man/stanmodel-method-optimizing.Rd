@@ -51,7 +51,7 @@
     \code{"random"}: randomly generated;
     \code{list}: a list specifying the initial values of parameters by name.
     \code{function}: a function that returns a list for specifying 
-      the initial values of parameters for a chain.}
+      the initial values of parameters.}
   \item{check_data}{Logical: if \code{TRUE}, the data would be preprocessed; 
     otherwise not. If the data is not checked and preprocessed, it is safe 
     to leave it to be the default \code{TRUE}. See the notes in
@@ -100,11 +100,11 @@
    \item{value}{The value of the log-posterior (up to an additive constant, 
    the \code{"lp__"} in Stan) corresponding to \code{par}.}
    \item{hessian}{The Hessian matrix if \code{hessian} is \code{TRUE}}
-   \item{theta\_tilde}{The matrix of parameter draws in the unconstrained space, 
+   \item{theta_tilde}{The matrix of parameter draws in the unconstrained space, 
      if \code{draws > 0}}
-   \item{log\_p}{If \code{draws > 0}, a vector of length draws that contains
+   \item{log_p}{If \code{draws > 0}, a vector of length draws that contains
      the value of the log-posterior evaluated at each row of \code{theta_tilde}}
-   \item{log\_g}{If \code{draws > 0}, a vector of length draws that contains
+   \item{log_g}{If \code{draws > 0}, a vector of length draws that contains
      the value of the logarithm of the multivariate normal density evaluated
      at each row of \code{theta_tilde}}
 

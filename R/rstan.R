@@ -1,5 +1,5 @@
 # This file is part of RStan
-# Copyright (C) 2012, 2013, 2014, 2015 Jiqiang Guo and Benjamin Goodrich
+# Copyright (C) 2012, 2013, 2014, 2015, 2016 Jiqiang Guo and Benjamin Goodrich
 #
 # RStan is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -105,12 +105,10 @@ stan_model <- function(file,
   # check for compilers
   if (.Platform$OS.type == "windows") find_rtools()
   else {
-    check <- system2(file.path(R.home(component = "bin"), "R"), 
-                     args = "CMD config CXX", 
-                     stdout = TRUE, stderr = FALSE)
-    if(nchar(check) == 0) {
+    CXX <- get_CXX()
+    if (nchar(CXX) == 0) {
       WIKI <- "https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started"
-      warning(paste("C++ compiler not found on system. If absent, see", WIKI))
+      warning(paste("C++ compiler not found on system. If absent, see\n", WIKI))
     }
   }
   
@@ -142,7 +140,13 @@ stan_model <- function(file,
   
   if (inc_path_fun("StanHeaders") == "")
     stop("StanHeaders not found; call install.packages('StanHeaders')")
+  
+  if (packageVersion("StanHeaders") > packageVersion("rstan"))
+    stop("StanHeaders version is ahead of rstan version; ",
+         "see https://github.com/stan-dev/rstan/wiki/RStan-Transition-Periods")
+    
 
+  
   dso <- cxxfunctionplus(signature(), body = paste(" return Rcpp::wrap(\"", model_name, "\");", sep = ''), 
                          includes = inc, plugin = "rstan", save_dso = save_dso | auto_write,
                          module_name = paste('stan_fit4', model_cppname, '_mod', sep = ''), 
