@@ -1,5 +1,5 @@
 # This file is part of RStan
-# Copyright (C) 2012, 2013, 2014, 2015, 2016 Jiqiang Guo and Benjamin Goodrich
+# Copyright (C) 2012, 2013, 2014, 2015, 2016 Trustees of Columbia University
 #
 # RStan is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -62,6 +62,14 @@ print.stanfit <- function(x, pars = x@sim$pars_oi,
       "For each parameter, n_eff is a crude measure of effective sample size,\n", 
       "and Rhat is the potential scale reduction factor on split chains (at \n",
       "convergence, Rhat=1).\n", sep = '')
+  gsp <- get_sampler_params(x, inc_warmup = FALSE)
+  if (!is.null(gsp) && "energy__" %in% colnames(gsp[[1]])) {
+    E <- sapply(gsp, FUN = function(x) x[,"energy__"])
+    EBFMI <- get_num_upars(x) / apply(E, 2, var)
+    cat(" The estimated Bayesian Fraction of Missing Information is a measure of\n",
+        "the efficiency of the sampler with values close to 1 being ideal.\n", 
+        "For each chain, these estimates are\n", round(EBFMI, 1), sep = " ")
+  }
   return(invisible(NULL)) 
 }  
 
@@ -315,7 +323,12 @@ setMethod("get_sampler_params",
             } else if (object@mode == 2L) {
               cat("Stan model '", object@model_name, "' does not contain samples.\n", sep = '') 
               return(invisible(NULL)) 
-            } 
+            }
+            
+            if (isTRUE(object@stan_args[[1L]]$method == "variational")) {
+              stop("'get_sampler_params' not available for ",
+                   "meanfield or fullrank algorithms.") 
+            }
 
             ldf <- lapply(object@sim$samples, 
                           function(x) do.call(cbind, attr(x, "sampler_params")))   
@@ -648,7 +661,7 @@ setMethod("grad_log_prob", signature = "stanfit",
 
 setMethod("traceplot", signature = "stanfit", 
           function(object, pars, include = TRUE, unconstrain = FALSE,
-                   inc_warmup = FALSE, nrow = NULL, ncol = NULL,
+                   inc_warmup = FALSE, window = NULL, nrow = NULL, ncol = NULL,
                    ...) { 
 
             if (object@mode == 1L) {
@@ -660,8 +673,8 @@ setMethod("traceplot", signature = "stanfit",
               return(invisible(NULL)) 
             } 
             args <- list(object = object, include = include, 
-                         unconstrain = unconstrain, inc_warmup=inc_warmup,
-                         nrow = nrow, ncol = ncol, ...)
+                         unconstrain = unconstrain, inc_warmup = inc_warmup,
+                         nrow = nrow, ncol = ncol, window = window, ...)
             if (!missing(pars)) { 
               if ("log-posterior" %in% pars)
                 pars[which(pars == "log-posterior")] <- "lp__"
@@ -778,6 +791,7 @@ as.matrix.stanfit <- function(x, ...) {
   if (x@mode != 0) return(numeric(0)) 
   e <- extract(x, permuted = FALSE, inc_warmup = FALSE, ...) 
   out <- apply(e, 3, FUN = function(y) y)
+  if (length(dim(out)) < 2L) out <- t(as.matrix(out))
   dimnames(out) <- dimnames(e)[-2]
   return(out)
 }

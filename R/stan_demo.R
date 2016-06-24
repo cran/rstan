@@ -1,5 +1,5 @@
 # This file is part of RStan
-# Copyright (C) 2012, 2013, 2014, 2015 Jiqiang Guo and Benjamin Goodrich
+# Copyright (C) 2012, 2013, 2014, 2015 Trustees of Columbia University
 #
 # RStan is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -44,9 +44,12 @@ function(model = character(0),
                           "example-models-master.zip")
       }
       else FILE <- file.path(tempdir(), "example-models-master.zip")
-      writeBin(RCurl::getBinaryURL("https://github.com/stan-dev/example-models/archive/master.zip",
-                                   .opts = RCurl::curlOptions(followlocation = TRUE,
-                                                              ssl.verifypeer = FALSE)), FILE)
+      URL <- "https://github.com/stan-dev/example-models/archive/master.zip"
+      on.exit(cat(paste("Download of example-models failed. Try unziping\n", 
+                        URL, "\nin", dirname(FILE))))
+      code <- download.file(URL, FILE)
+      if (code != 0) stop()
+      else on.exit(NULL)
       unzip(FILE, exdir = dirname(FILE))
       MODELS_HOME <- file.path(dirname(FILE), "example-models-master")
     }

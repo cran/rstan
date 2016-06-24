@@ -1,5 +1,5 @@
 # This file is part of RStan
-# Copyright (C) 2012, 2013, 2014, 2015 Jiqiang Guo and Benjamin Goodrich
+# Copyright (C) 2012, 2013, 2014, 2015 Trustees of Columbia University
 #
 # RStan is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -44,11 +44,11 @@ setMethod('is_dso_loaded', signature(object = 'cxxdso'),
           }) 
 
 setMethod('grab_cxxfun', signature(object = "cxxdso"), 
-          function(object) { 
-            if (!is_null_cxxfun(object@.CXXDSOMISC$cxxfun)) 
-              return(object@.CXXDSOMISC$cxxfun)
+          function(object) {
             if (length(object@dso_saved) == 0)
               return(function(...) stop("this function should not be called"))
+            if (!is_null_cxxfun(object@.CXXDSOMISC$cxxfun)) 
+              return(object@.CXXDSOMISC$cxxfun)
             if (!object@dso_saved) 
               stop("the cxx fun is NULL now and this cxxdso is not saved")
 
