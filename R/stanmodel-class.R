@@ -432,6 +432,8 @@ setMethod("sampling", "stanmodel",
                   "' NOW.\n", sep = '')
             stan_fit_cpp_module <- object@mk_cppmodule(object)
             cxxfun <- grab_cxxfun(object@dso)
+            dots <- list(...)
+            data$CHAIN_ID <- dots$chain_id            
             if (verbose)
               cat('\n', "STARTING SAMPLER FOR MODEL '", object@model_name, 
                   "' NOW.\n", sep = '')
@@ -444,7 +446,6 @@ setMethod("sampling", "stanmodel",
             assign("stan_fit_instance", sampler, envir = sfmiscenv)
             m_pars = sampler$param_names()
             p_dims = sampler$param_dims()
-            dots <- list(...)
             mode <- if (!is.null(dots$test_grad) && dots$test_grad) 
               "TESTING GRADIENT" else "SAMPLING"
             
@@ -638,18 +639,14 @@ setMethod("sampling", "stanmodel",
                   colnames(mat) <- "count"
                   if (.Platform$OS.type == "windows") {
                     print(mat)
-                    print("When a numerical problem occurs, the Metropolis proposal gets rejected.")
-                    print(paste("However, by design Metropolis proposals sometimes get rejected ", 
-                                "even when there are no numerical problems."))
-                    print(paste("Thus, if the number in the 'count' column is small, ",
+                    print("When a numerical problem occurs, the Hamiltonian proposal gets rejected.")
+                    print(paste("If the number in the 'count' column is small, ",
                                 "do not ask about this message on stan-users."))
                   }
                   else {
                     message(paste(capture.output(print(mat)), collapse = "\n"))
-                    message("When a numerical problem occurs, the Metropolis proposal gets rejected.")
-                    message("However, by design Metropolis proposals sometimes get rejected ", 
-                            "even when there are no numerical problems.")
-                    message("Thus, if the number in the 'count' column is small, ",
+                    message("When a numerical problem occurs, the Hamiltonian proposal gets rejected.")
+                    message("If the number in the 'count' column is small, ",
                             "do not ask about this message on stan-users.")
                   }
                 }
