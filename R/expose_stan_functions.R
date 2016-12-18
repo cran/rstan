@@ -15,7 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-expose_stan_functions <- function(stanmodel) {
+expose_stan_functions <- function(stanmodel, env = globalenv()) {
   if(is(stanmodel, "stanfit")) {
     stanmodel <- get_stanmodel(stanmodel)
     stanmodel <- get_cppcode(stanmodel)
@@ -27,8 +27,9 @@ expose_stan_functions <- function(stanmodel) {
     stanmodel <- get_cppcode(stanmodel)
   }
   else if(is.character(stanmodel)) {
-    if(length(stanmodel) == 1) stanmodel <- stanc(file = stanmodel)$cppcode
-    else stanmodel <- stanc(model_code = stanmodel)$cppcode
+    if(length(stanmodel) == 1) 
+      stanmodel <- stanc(file = stanmodel, allow_undefined = TRUE)$cppcode
+    else stanmodel <- stanc(model_code = stanmodel, allow_undefined = TRUE)$cppcode
   }
   else stop("'stanmodel' is not a valid object")
   
@@ -221,7 +222,7 @@ expose_stan_functions <- function(stanmodel) {
              if (has_model) "#include <src/stan/model/indexing.hpp>",
              "#include <boost/exception/all.hpp>",
              "#include <boost/random/linear_congruential.hpp>",
-             
+
              "#include <cmath>",
              "#include <cstddef>",
              "#include <fstream>",
@@ -235,13 +236,13 @@ expose_stan_functions <- function(stanmodel) {
              "#include <boost/math/special_functions/fpclassify.hpp>",
              "#include <boost/random/additive_combine.hpp>",
              "#include <boost/random/uniform_real_distribution.hpp>",
-             
+
              lines)
   
   # try to compile
   on.exit(message("Here is the C++ code that does not compile. Please report bug."))
   on.exit(print(lines), add = TRUE)
-  compiled <- Rcpp::sourceCpp(code = paste(lines, collapse = "\n"))
+  compiled <- Rcpp::sourceCpp(code = paste(lines, collapse = "\n"), env = env)
   on.exit(NULL)
   return(invisible(compiled$functions))
 }

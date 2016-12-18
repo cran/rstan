@@ -8,13 +8,13 @@ Expose user-defined Stan functions to \R for testing and simulation
   \code{functions} block at the top of a Stan program. The 
   \code{expose_stan_functions} utility function uses
   \code{\link[Rcpp]{sourceCpp}} to export those user-defined functions
-  to the user's workspace (\code{\link{.GlobalEnv}}) for 
-  testing inside \R or for doing posterior predictive simulations in \R rather 
-  than in the \code{generated quantities} block of a Stan program.
+  to the specified environment for testing inside \R or for doing posterior
+  predictive simulations in \R rather than in the \code{generated 
+  quantities} block of a Stan program.
 }
 \usage{
-  expose_stan_functions(stanmodel)
-} 
+  expose_stan_functions(stanmodel, env = globalenv())
+}
 
 \arguments{
   \item{stanmodel}{
@@ -22,6 +22,10 @@ Expose user-defined Stan functions to \R for testing and simulation
     object, a list produced by \code{\link{stanc}} or the path to a Stan 
     program (\code{.stan} file). In any of these cases, the underlying Stan 
     program should contain a non-empty \code{functions} block.
+  }
+ \item{env}{
+   an \code{\link[base]{environment}}. By default, the global environment
+   is used.
   }
 }
 
@@ -49,12 +53,12 @@ Expose user-defined Stan functions to \R for testing and simulation
   \code{\link{formals}}. This \code{lp__} argument defaults to zero, but a 
   \code{\link{double}} precision scalar may be  passed to this argument when the 
   function is called from \R. Such a user-defined Stan function can terminate 
-  with \code{return get_lp();} or can execute \code{print(lp__);} to verify that 
+  with \code{return target();} or can execute \code{print(target());} to verify that 
   the calculation is correct.
   }
 }
 \value{
-  The names of the new functions in \code{\link{.GlobalEnv}} are returned invisibly.
+  The names of the new functions in \code{env} are returned invisibly.
 }
 \seealso{
   \code{\link[Rcpp]{sourceCpp}}

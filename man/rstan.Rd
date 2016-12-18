@@ -5,6 +5,11 @@
 \docType{package}
 \title{RStan --- \R interface to Stan}
 \description{
+\if{html}{
+   \figure{stanlogo.png}{options: width="50px" alt="mc-stan.org"}
+   \emph{Stan Development Team}
+}
+
   RStan is the \R interface to the Stan C++ package. RStan provides
   \itemize{
   \item full Bayesian inference using the No-U-Turn sampler (NUTS), 
@@ -20,8 +25,6 @@
 \details{
   \tabular{ll}{
     Package: \tab rstan\cr
-    Version: \tab 2.10.0\cr
-    Date: \tab June 20, 2016\cr
     License: \tab GPL-3 \cr
   }
   
@@ -34,7 +37,7 @@
   \tabular{ll}{
   Authors:\tab Jiqiang Guo <guojq28@gmail.com>   \cr 
           \tab Ben Goodrich <benjamin.goodrich@columbia.edu> \cr
-          \tab Jonah Gabry >jsg2201@columbia.edu> \cr
+          \tab Jonah Gabry <jsg2201@columbia.edu> \cr
   }
 
   \tabular{ll}{

@@ -11,9 +11,10 @@ Translate Stan model specification to C++ code
 }
 \usage{
   stanc(file, model_code = '', model_name = "anon_model", verbose = FALSE,
-        obfuscate_model_name = TRUE) 
+        obfuscate_model_name = TRUE, allow_undefined = FALSE) 
   stanc_builder(file, isystem = c(dirname(file), getwd()),
-                verbose = FALSE, obfuscate_model_name = FALSE)
+                verbose = FALSE, obfuscate_model_name = FALSE,
+                allow_undefined = FALSE)
 } 
 
 \arguments{
@@ -36,6 +37,10 @@ Translate Stan model specification to C++ code
   \item{isystem}{A character vector naming a path to look for 
     file paths in \code{file} that are to be included within the Stan program
     named by \code{file}. See the Details section below.}
+  \item{allow_undefined}{A logical scalar defaulting to \code{FALSE} indicating
+    whether to allow Stan functions to be declared but not defined in \code{file}
+    or \code{model_code}. If \code{TRUE}, then it is the caller's responsibility
+    to provide a function definition in another header file or linked shared object.}
 } 
 
 \details{
@@ -62,8 +67,8 @@ Translate Stan model specification to C++ code
     \item \code{model_name} Character string for the model name.
     \item \code{model_code} Character string for the model's Stan specification. 
     \item \code{cppcode}    Character string for the model's C++ code. 
-    \item \code{status}     Logical indicating success/failure (\code{TRUE/FALSE}) of 
-                            translating the Stan code. 
+    \item \code{status}     Logical indicating success/failure (always \code{TRUE}) 
+                            of translating the Stan code.
   } 
 }
 
