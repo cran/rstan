@@ -1,5 +1,5 @@
 # This file is part of RStan
-# Copyright (C) 2012, 2013, 2014, 2015, 2016 Trustees of Columbia University
+# Copyright (C) 2012, 2013, 2014, 2015, 2016, 2017 Trustees of Columbia University
 #
 # RStan is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -120,6 +120,14 @@ expose_stan_functions <- function(stanmodel, env = globalenv()) {
   
   ints <- sort(c(grep("^int$", lines), grep("^std::vector<.*int>", lines)))
   for (i in rev(ints))
+    lines <- append(lines, "// [[Rcpp::export]]", i - 1L)
+  
+  doubles <- sort(c(grep("^double$", lines), grep("^std::vector<.*double>", lines), 
+                    grep("^vector_d$", lines), grep("^matrix_d", lines),
+                    grep("^std::vector<.*vector_d>", lines),
+                    grep("^std::vector<.*matrix_d>", lines)))
+                    
+  for (i in rev(doubles))
     lines <- append(lines, "// [[Rcpp::export]]", i - 1L)
 
   # declare attributes for Rcpp for non-functor user-defined Stan functions

@@ -1,5 +1,5 @@
 # This file is part of RStan
-# Copyright (C) 2012, 2013, 2014, 2015 Trustees of Columbia University
+# Copyright (C) 2012, 2013, 2014, 2015, 2016, 2017 Trustees of Columbia University
 #
 # RStan is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -40,6 +40,7 @@ parse_stancsv_comments <- function(comments) {
   # generated from Stan
 
   adapt_term_lineno <- which(grepl("Adaptation terminated", comments))[1]
+  if (is.na(adapt_term_lineno)) adapt_term_lineno <- length(comments)
   time_lineno <- which(grepl("Elapsed Time", comments))
   has_time <- length(time_lineno) > 0
   len <- length(comments)
@@ -60,7 +61,7 @@ parse_stancsv_comments <- function(comments) {
     time_info <- comments[time_lineno:len]
   else
     time_info <- ''
-  comments <- comments[1:(adapt_term_lineno - 1)]
+  if (adapt_term_lineno > 0) comments <- head(comments, adapt_term_lineno - 1L)
 
   has_eq <- sapply(comments, function(i) grepl('=', i))
   comments <- comments[has_eq] 

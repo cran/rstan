@@ -1,5 +1,5 @@
 # This file is part of RStan
-# Copyright (C) 2012, 2013, 2014, 2015, 2016 Trustees of Columbia University
+# Copyright (C) 2012, 2013, 2014, 2015, 2016, 2017 Trustees of Columbia University
 #
 # RStan is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -182,7 +182,11 @@ setMethod("vb", "stanmodel",
             
             m_pars <- sampler$param_names()
             p_dims <- sampler$param_dims()
-            if(!include) pars <- setdiff(m_pars, pars)
+            if(!include) {
+              if (length(pars) == 1 && is.na(pars)) pars <- "lp__"
+              else pars <- setdiff(m_pars, pars)
+              if (length(pars) == 0) pars <- "lp__"
+            }
             
             if (!missing(pars) && !is.na(pars) && length(pars) > 0) {
               sampler$update_param_oi(pars)
@@ -337,6 +341,9 @@ setMethod("optimizing", "stanmodel",
             if (!is.null(dotlist$method))  dotlist$method <- NULL
             if (!verbose && is.null(dotlist$refresh)) dotlist$refresh <- 0L
             optim <- sampler$call_sampler(c(args, dotlist))
+            optim$return_code <- attr(optim, "return_code")
+            if (optim$return_code != 0) warning("non-zero return code in optimizing")
+            attr(optim, "return_code") <- NULL
             names(optim$par) <- flatnames(m_pars, p_dims, col_major = TRUE)
             skeleton <- create_skeleton(m_pars, p_dims)
             if (hessian || draws) {
@@ -392,6 +399,9 @@ setMethod("sampling", "stanmodel",
                    open_progress = interactive() && !isatty(stdout()) &&
                      !identical(Sys.getenv("RSTUDIO"), "1"), 
                    show_messages = TRUE, ...) {
+            is_arg_deprecated(names(list(...)),
+                              c("enable_random_init"),
+                              pre_msg = "passing deprecated arguments: ")
             objects <- ls()
             if (is.list(data) & !is.data.frame(data)) {
               parsed_data <- with(data, parse_data(get_cppcode(object)))
@@ -571,8 +581,11 @@ setMethod("sampling", "stanmodel",
                                   pre_msg = "passing unknown arguments: ",
                                   call. = FALSE)
             }
-
-            if(!include) pars <- setdiff(m_pars, pars)
+            if(!include) {
+              if (length(pars) == 1 && is.na(pars)) pars <- "lp__"
+              else pars <- setdiff(m_pars, pars)
+              if (length(pars) == 0) pars <- "lp__"
+            }
             
             if (!missing(pars) && !is.na(pars) && length(pars) > 0) {
               sampler$update_param_oi(pars)
@@ -675,7 +688,7 @@ setMethod("sampling", "stanmodel",
 
             idx_wo_lp <- which(m_pars != 'lp__')
             skeleton <- create_skeleton(m_pars[idx_wo_lp], p_dims[idx_wo_lp])
-            inits_used = lapply(lapply(samples, function(x) attr(x, "inits")), 
+            inits_used = lapply(lapply(samples, function(x) attr(x, "inits")),
                                 function(y) rstan_relist(y, skeleton))
 
             # test_gradient mode: no sample 
