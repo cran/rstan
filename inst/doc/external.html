@@ -12,7 +12,7 @@
 
 <meta name="author" content="Stan Development Team" />
 
-<meta name="date" content="2017-04-19" />
+<meta name="date" content="2017-07-03" />
 
 <title>Interfacing with External C++ Code</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Interfacing with External C++ Code</h1>
 <h4 class="author"><em>Stan Development Team</em></h4>
-<h4 class="date"><em>2017-04-19</em></h4>
+<h4 class="date"><em>2017-07-03</em></h4>
 
 
 
@@ -102,13 +102,13 @@ model {} // use the complicated() function somehow</code></pre>
 <pre><code>## SYNTAX ERROR, MESSAGE(S) FROM PARSER:</code></pre>
 <pre><code>## </code></pre>
 <pre><code>## Function declared, but not defined. Function name=fib</code></pre>
-<pre><code>## </code></pre>
-<pre><code>## ERROR at line 2</code></pre>
-<pre><code>## </code></pre>
-<pre><code>##   1:</code></pre>
-<pre><code>##   2:    functions { int fib(int n); }</code></pre>
+<pre><code>##   error in 'model467022037e85_parser_error' at line 2, column 30</code></pre>
+<pre><code>##   -------------------------------------------------</code></pre>
+<pre><code>##      1:</code></pre>
+<pre><code>##      2: functions { int fib(int n); }</code></pre>
 <pre><code>##                                      ^</code></pre>
-<pre><code>##   3:    model {} // use the fib() function somehow</code></pre>
+<pre><code>##      3: model {} // use the fib() function somehow</code></pre>
+<pre><code>##   -------------------------------------------------</code></pre>
 <pre><code>## </code></pre>
 <p>However, if we specify the <code>allow_undefined</code> and <code>includes</code> arguments to the <code>stan_model</code> function, and define a <code>fib</code> function in the named C++ header file, then it will parse and compile</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">stan_model</span>(<span class="dt">model_code =</span> mc, <span class="dt">model_name =</span> <span class="st">&quot;external&quot;</span>, <span class="dt">allow_undefined =</span> <span class="ot">TRUE</span>,
@@ -143,12 +143,14 @@ model {} // use the complicated() function somehow</code></pre>
 
 #include &lt;stan/io/cmd_line.hpp&gt;
 #include &lt;stan/io/dump.hpp&gt;
+#include &lt;stan/io/program_reader.hpp&gt;
 #include &lt;stan/io/reader.hpp&gt;
 #include &lt;stan/io/writer.hpp&gt;
 
 #include &lt;stan/lang/rethrow_located.hpp&gt;
 #include &lt;stan/model/prob_grad.hpp&gt;
 #include &lt;stan/model/indexing.hpp&gt;
+#include &lt;stan/services/util/create_rng.hpp&gt;
 
 #include &lt;boost/exception/all.hpp&gt;
 #include &lt;boost/random/additive_combine.hpp&gt;
@@ -201,11 +203,11 @@ besselK(<span class="at">const</span> T0__&amp; v, <span class="at">const</span>
 <p>because, in general, its first two arguments could either be integers, known real numbers, or unknown but real parameters. In the case of unknown real numbers, Stan will need to rely on its autodifferentiation mechanism to keep track of the derivative with respect to those arguments during estimation. But if either of the first two arguments is an integer or a known real number, then Stan avoids taking derivatives with respect to them. Thus, it is useful to utilize C++ templates that can generate all (four in this case) versions of this Bessel function with only a few lines of C++ source code. The first line of besselK.hpp states that the first two arguments are going to be templated with typenames <code>TO__</code> and <code>T1__</code> respectively. The second line is convoluted but merely states that the return type of the <code>besselK</code> function depends on <code>TO__</code> and <code>T1__</code>. In short, if either is an unknown real parameter, then the result will also be an unknown real parameter. The third line contains the generated signature of the function in C++, which involves the typenames <code>TO__</code> and <code>T1__</code>, as well as the pointer to a <code>std::ostream</code> (which is again not used in the body of the function). The body of the <code>besselK</code> function is simply a call to the coresponding function in the Boost Math Library, whose headers are pulled in by the Stan Math Library but the <code>boost::math::</code> prefix is necessary due to the absence of a <code>using boost::math;</code> statement.</p>
 <p>An easy way to see what the generated function signature will be is to call the <code>stanc</code> function in the <strong>rstan</strong> package with <code>allow_undefined = TRUE</code> and inspect the resuling C++ code. In this case, I first did</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">try</span>(<span class="kw">readLines</span>(<span class="kw">stanc</span>(<span class="dt">model_code =</span> mc, <span class="dt">allow_undefined =</span> <span class="ot">TRUE</span>)$cppcode))</code></pre></div>
-<pre><code>## Warning in file(con, &quot;r&quot;): cannot open file '// Code generated by Stan version 2.15.0
+<pre><code>## Warning in file(con, &quot;r&quot;): cannot open file '// Code generated by Stan version 2.16.0
 ## 
 ## #include &lt;stan/model/model_header.hpp&gt;
 ## 
-## namespace model5376703d2e6a_mc_namespace {
+## namespace model46703da6da1d_mc_namespace {
 ## 
 ## using std::istream;
 ## using std::string;
@@ -222,19 +224,19 @@ besselK(<span class="at">const</span> T0__&amp; v, <span class="at">const</span>
 ## 
 ## static int current_statement_begin__;
 ## 
+## stan::io::program_reader prog_reader__() {
+##     stan::io::program_reader reader;
+##     reader.add_event(0, 0, &quot;start&quot;, &quot;model46703da6da1d_mc&quot;);
+##     reader.add_event(3, 3, &quot;end&quot;, &quot;model46703da6da1d_mc&quot;);
+##     return reader;
+## }
+## 
 ## template &lt;typename T0__, typename T1__&gt;
 ## typename boost::math::tools::promote_args&lt;T0__, T1__&gt;::type
 ## besselK(const T0__&amp; v,
 ##             const T1__&amp; z, std::ostream* pstream__);
 ## 
-## class model5376703d2e6a_mc : public prob_grad {
-## private:
-## public:
-##     model5376703d2e6a_mc(stan::io::var_context&amp; context__,
-##         std::ostream* pstream__ = 0)
-##         : prob_grad(0) {
-##         typedef boost::ecuyer1988 rng_t;
-##         rng_t base_rng(0);  // 0 s [... truncated]</code></pre>
+## class model46703da6da1d_mc : public pro [... truncated]</code></pre>
 <p>to see what function signature needed to be written for besselK.hpp.</p>
 <p>When using external C++ code, care must be taken to ensure that the function is numerically stable over a wide range of floating point numbers. Indeed, in the case of the <code>besselK</code> function, the derivative with respect to the order argument (<code>v</code>) may not be sufficiently stable numerically. In general, it is best to strip the underlying double-precision numbers out of Stan’s custom scalar types, evaluate the desired function, and then calculate the necessary derivatives analytically in an object whose class that inherits from the <code>vari</code> class in Stan. The details of doing so are beyond the scope of this vignette but are discussed in the links above. Once you go to the trouble of writing such a C++ function, we would welcome a pull request on GitHub to include your C++ function in the Stan Math Library for everyone to benefit from, provided that it can be licensed under the 3-clause BSD license and its use is not overly-specific to your particular Stan program.</p>
 <p>The Stan Math Library is compliant with the C++11 standard but currently does not utilize any features that were introduced by the C++11 standard nor does it require a compiler that is compliant with the C++11 standard. However, almost any modern C++ compiler is compliant, so you can use (at least some subset of the) features that were introduced by the C++11 standard in external C++ code and your Stan program should compile (perhaps with some warnings). In particular, you may want to use the <code>auto</code> keyword to avoid having to learn a lot of the messy type-promotion syntax used in the Stan Math Library and the rules for what kind of object is returned by various mathematical operations. For example, under the C++11 standard, the <code>besselK.hpp</code> file could be written as</p>

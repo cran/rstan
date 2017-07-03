@@ -15,7 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-expose_stan_functions <- function(stanmodel, env = globalenv()) {
+expose_stan_functions <- function(stanmodel, ...) {
   if(is(stanmodel, "stanfit")) {
     stanmodel <- get_stanmodel(stanmodel)
     stanmodel <- get_cppcode(stanmodel)
@@ -123,7 +123,7 @@ expose_stan_functions <- function(stanmodel, env = globalenv()) {
     lines <- append(lines, "// [[Rcpp::export]]", i - 1L)
   
   doubles <- sort(c(grep("^double$", lines), grep("^std::vector<.*double>", lines), 
-                    grep("^vector_d$", lines), grep("^matrix_d", lines),
+                    grep("^vector_d$", lines), grep("^matrix_d$", lines),
                     grep("^std::vector<.*vector_d>", lines),
                     grep("^std::vector<.*matrix_d>", lines)))
                     
@@ -254,7 +254,16 @@ expose_stan_functions <- function(stanmodel, env = globalenv()) {
   # try to compile
   on.exit(message("Here is the C++ code that does not compile. Please report bug."))
   on.exit(print(lines), add = TRUE)
-  compiled <- Rcpp::sourceCpp(code = paste(lines, collapse = "\n"), env = env)
+  compiled <- Rcpp::sourceCpp(code = paste(lines, collapse = "\n"), ...)
   on.exit(NULL)
   return(invisible(compiled$functions))
 }
+
+# This does not work yet
+# expose_stan_functions <- function(file, ...) {
+#   model_code <- get_model_strcode(file, NULL)  
+#   model_cppname <- legitimate_model_name(basename(file), obfuscate_name = TRUE) 
+#   r <- .Call("stanfuncs", model_code, model_cppname, allow_undefined = FALSE)
+#   compiled <- Rcpp::sourceCpp(code = paste(r$cppcode, collapse = "\n"), ...)
+#   return(invisible(compiled$functions))
+# }
