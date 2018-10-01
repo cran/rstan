@@ -154,9 +154,7 @@ stan_model <- function(file,
     stop("Eigen not found; call install.packages('RcppEigen')")
   
   if (packageVersion("StanHeaders") > packageVersion("rstan"))
-    stop("StanHeaders version is ahead of rstan version; ",
-         "see https://github.com/stan-dev/rstan/wiki/RStan-Transition-Periods")
-    
+    warning("StanHeaders version is ahead of rstan version; update to latest rstan")
 
   
   dso <- cxxfunctionplus(signature(), body = paste(" return Rcpp::wrap(\"", model_name, "\");", sep = ''), 

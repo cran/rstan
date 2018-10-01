@@ -1,8 +1,8 @@
 Package: rstan
 Type: Package
 Title: R Interface to Stan
-Version: 2.17.3
-Date: 2018-01-15
+Version: 2.17.4
+Date: 2018-10-01
 Authors@R: c(person("Jiqiang", "Guo", email = "guojq28@gmail.com", role = "aut"),
              person("Jonah", "Gabry", email = "jsg2201@columbia.edu", role = "aut"),
              person("Ben", "Goodrich", email = "benjamin.goodrich@columbia.edu", role = c("cre", "aut")),
@@ -30,7 +30,7 @@ License: GPL (>= 3)
 NeedsCompilation: yes
 Imports: methods, stats4, inline, gridExtra (>= 2.0.0), Rcpp (>=
         0.12.0)
-Depends: R (>= 3.0.2), ggplot2 (>= 2.0.0), StanHeaders (>= 2.17.2)
+Depends: R (>= 3.4.0), ggplot2 (>= 2.0.0), StanHeaders (>= 2.17.2)
 LinkingTo: Rcpp (>= 0.12.0), RcppEigen (>= 0.3.3.3.0), BH (>= 1.65),
         StanHeaders (>= 2.17.2)
 Suggests: RUnit, RcppEigen (>= 0.3.3.3.0), BH (>= 1.65), parallel,
@@ -41,7 +41,7 @@ BugReports: https://github.com/stan-dev/rstan/issues/
 VignetteBuilder: knitr
 SystemRequirements: pandoc
 RoxygenNote: 5.0.1
-Packaged: 2018-01-19 22:55:50 UTC; goodrich
+Packaged: 2018-10-01 03:51:59 UTC; goodrich
 Author: Jiqiang Guo [aut],
   Jonah Gabry [aut],
   Ben Goodrich [cre, aut],
@@ -58,4 +58,4 @@ Author: Jiqiang Guo [aut],
   Eric Niebler [cph] (Boost)
 Maintainer: Ben Goodrich <benjamin.goodrich@columbia.edu>
 Repository: CRAN
-Date/Publication: 2018-01-20 15:33:21 UTC
+Date/Publication: 2018-10-01 05:30:03 UTC
