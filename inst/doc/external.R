@@ -24,14 +24,14 @@ cat(readLines(system.file("include", "src", "stan", "model", "model_header.hpp",
 ## ---- eval = TRUE--------------------------------------------------------
 mc <- 
 '
-functions { real besselK(real v, real z); }
-model {} // use the besselK() function somehow
+functions { real sinc(real x); }
+model {} // use the sinc() function somehow
 '
 
 ## ------------------------------------------------------------------------
 #  stan_model(model_code = mc, model_name = "external", allow_undefined = TRUE,
 #             includes = paste0('\n#include "',
-#                               file.path(getwd(), 'besselK.hpp'), '"\n'))
+#                               file.path(getwd(), 'sinc.hpp'), '"\n'))
 
 ## ---- eval = TRUE--------------------------------------------------------
 try(readLines(stanc(model_code = mc, allow_undefined = TRUE)$cppcode))

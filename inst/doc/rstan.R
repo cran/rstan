@@ -30,8 +30,8 @@ fit1 <- stan(
   chains = 4,             # number of Markov chains
   warmup = 1000,          # number of warmup iterations per chain
   iter = 2000,            # total number of iterations per chain
-  cores = 2,              # number of cores (using 2 just for the vignette)
-  refresh = 1000          # show progress every 'refresh' iterations
+  cores = 2,              # number of cores (could use one per chain)
+  refresh = 0             # no progress shown
   )
 
 ## ---- print--------------------------------------------------------------
@@ -68,7 +68,7 @@ functions {
 model {}
 '
 expose_stan_functions(stanc(model_code = model_code))
-standard_normal_rng(seed = 1)
+standard_normal_rng()
 
 ## ---- optimizer, results="hide"------------------------------------------
 ocode <- "
