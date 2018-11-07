@@ -46,6 +46,13 @@ setGeneric(name = 'vb',
 setGeneric(name = "sampling",
            def = function(object, ...) { standardGeneric("sampling")})
 
+setMethod('get_stancode', signature = "stanmodel", 
+          function(object, print = FALSE) {
+            code <- object@model_code
+            if (print) cat(code, "\n") 
+            return(code)
+          }) 
+
 setGeneric(name = "get_cppcode", 
            def = function(object, ...) { standardGeneric("get_cppcode") })
 
@@ -385,23 +392,22 @@ setMethod("optimizing", "stanmodel",
                 R_inv <- backsolve(R, diag(K))
                 Z <- matrix(rnorm(K * draws), K, draws)
                 theta_tilde <- t(theta + R_inv %*% Z)
+                log_p <- apply(theta_tilde, 1, FUN = function(theta) {
+                  sampler$log_prob(theta, adjust_transform = TRUE, gradient = FALSE)
+                })
+                log_g <- colSums(dnorm(Z, log = TRUE)) - sum(log(diag(R_inv)))
+                optim$log_p <- log_p
+                optim$log_g <- log_g
+                colnames(theta_tilde) <- colnames(H)
+                optim$log_prob <- sampler$log_prob
+                optim$grad_log_prob <- sampler$grad_log_prob
                 if (constrained) {
                   theta_tilde <- t(apply(theta_tilde, 1, FUN = function(theta) {
                     sampler$constrain_pars(theta)  
                   }))
-                  colnames(theta_tilde) <- names(optim$par)
+                  if (length(theta) == 1L) theta_tilde <- t(theta_tilde)
                 }
-                else {
-                  log_p <- apply(theta_tilde, 1, FUN = function(theta) {
-                    sampler$log_prob(theta, adjust_transform = TRUE, gradient = FALSE)
-                  })
-                  log_g <- colSums(dnorm(Z, log = TRUE)) - sum(log(diag(R_inv)))
-                  optim$log_p <- log_p
-                  optim$log_g <- log_g
-                  colnames(theta_tilde) <- colnames(H)
-                  optim$log_prob <- sampler$log_prob
-                  optim$grad_log_prob <- sampler$grad_log_prob
-                }
+                colnames(theta_tilde) <- names(optim$par)
                 optim$theta_tilde <- theta_tilde
               }
             }

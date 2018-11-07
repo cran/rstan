@@ -12,7 +12,7 @@
 
 <meta name="author" content="Stan Development Team" />
 
-<meta name="date" content="2018-10-15" />
+<meta name="date" content="2018-11-06" />
 
 <title>Accessing the contents of a stanfit object</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Accessing the contents of a stanfit object</h1>
 <h4 class="author"><em>Stan Development Team</em></h4>
-<h4 class="date"><em>2018-10-15</em></h4>
+<h4 class="date"><em>2018-11-06</em></h4>
 
 
 <div id="TOC">
@@ -88,7 +88,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>This vignette demonstrates how to access most of data stored in a stanfit object. A stanfit object (an object of class <code>&quot;stanfit&quot;</code>) contains the output derived from fitting a Stan model using Markov chain Monte Carlo or one of Stan’s variational approximations (meanfield or full-rank). Throughout the document we’ll use the stanfit object obtained from fitting the Eight Schools example model:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(rstan)
 fit &lt;-<span class="st"> </span><span class="kw">stan_demo</span>(<span class="st">&quot;eight_schools&quot;</span>, <span class="dt">refresh =</span> <span class="dv">0</span>)</code></pre></div>
-<pre><code>Warning: There were 7 divergent transitions after warmup. Increasing adapt_delta above 0.8 may help. See
+<pre><code>Warning: There were 5 divergent transitions after warmup. Increasing adapt_delta above 0.8 may help. See
 http://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup</code></pre>
 <pre><code>Warning: Examine the pairs() plot to diagnose sampling problems</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">class</span>(fit)</code></pre></div>
@@ -107,26 +107,26 @@ attr(,&quot;package&quot;)
 <pre><code>[1] &quot;mu&quot;    &quot;tau&quot;   &quot;eta&quot;   &quot;theta&quot; &quot;lp__&quot; </code></pre>
 <p>In this model the parameters <code>mu</code> and <code>tau</code> are scalars and <code>theta</code> is a vector with eight elements. This means that the draws for <code>mu</code> and <code>tau</code> will be vectors (with length equal to the number of post-warmup iterations times the number of chains) and the draws for <code>theta</code> will be a matrix, with each column corresponding to one of the eight components:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(list_of_draws$mu)</code></pre></div>
-<pre><code>[1]  1.430835  3.504714  9.725051  2.966655  4.303380 -2.387750</code></pre>
+<pre><code>[1]  0.5447095  4.7252417  3.2569470 -0.8286781  9.6219050  8.2216086</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(list_of_draws$tau)</code></pre></div>
-<pre><code>[1] 12.2144136 15.8144305 11.3591926  0.2235964  4.8859030  6.7034105</code></pre>
+<pre><code>[1]  8.5346787 17.9086457  0.6533242  7.6947293  0.4868406  0.1776437</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(list_of_draws$theta)</code></pre></div>
 <pre><code>          
-iterations      [,1]      [,2]       [,3]       [,4]      [,5]        [,6]
-      [1,] 22.334163 -2.997976 -2.8776930 -0.8480270  3.459989 -13.1802028
-      [2,] 28.089985  3.132455  0.1999556 18.2216965  5.665701   0.7264871
-      [3,] 19.936441  1.935211  3.3791490 14.5740874 20.354571   8.4910330
-      [4,]  2.852208  3.229695  2.9875979  2.7578578  3.202504   3.0671686
-      [5,]  4.967234 -1.237070  6.4082698 10.4861581  3.208666  10.7337528
-      [6,] -1.141533 -8.919631  3.1559991 -0.2474029 -5.383388   6.4620609
+iterations      [,1]      [,2]      [,3]      [,4]      [,5]     [,6]
+      [1,]  6.418424  2.377951 -7.457418 -4.285390  6.260707 4.035662
+      [2,] 16.200762 20.996226 13.522734 10.804684 -5.715024 1.373639
+      [3,]  2.730646  2.906606  3.566164  4.272856  3.946449 3.156987
+      [4,] -9.516586  3.419058  2.609175  2.106274  1.168186 2.333335
+      [5,] 10.649391  9.347813  8.845197  9.312305 10.572009 8.837870
+      [6,]  7.779830  8.059589  8.098960  8.071455  8.152695 8.439963
           
-iterations      [,7]      [,8]
-      [1,]  7.783433  3.265144
-      [2,] 13.091820 15.387439
-      [3,] 14.547657 14.912129
-      [4,]  3.279478  2.762896
-      [5,]  3.441809  4.177468
-      [6,]  9.026767  1.142228</code></pre>
+iterations       [,7]       [,8]
+      [1,] -10.233530 -0.2492004
+      [2,]   2.659190 20.2856562
+      [3,]   2.915854  1.8150799
+      [4,]  10.873250 -8.2252264
+      [5,]   9.736105  9.5069306
+      [6,]   8.829198  8.4036264</code></pre>
 <p><br></p>
 </div>
 <div id="as.matrix-as.data.frame-as.array" class="section level4">
@@ -168,13 +168,13 @@ $parameters
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mu_and_theta1 &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(fit, <span class="dt">pars =</span> <span class="kw">c</span>(<span class="st">&quot;mu&quot;</span>, <span class="st">&quot;theta[1]&quot;</span>))
 <span class="kw">head</span>(mu_and_theta1)</code></pre></div>
 <pre><code>          parameters
-iterations        mu  theta[1]
-      [1,] -1.146758 18.355191
-      [2,]  3.220000 20.902001
-      [3,]  1.119717  4.965709
-      [4,] -1.844905  4.535402
-      [5,] -2.065734  4.047685
-      [6,]  4.139765 11.257879</code></pre>
+iterations       mu  theta[1]
+      [1,] 7.834656 14.658213
+      [2,] 8.602845  8.707589
+      [3,] 6.683328  6.059371
+      [4,] 1.136996 16.144736
+      [5,] 3.099223 12.282279
+      [6,] 9.837489  9.743201</code></pre>
 <p><br></p>
 </div>
 </div>
@@ -189,57 +189,57 @@ iterations        mu  theta[1]
 <p>For models fit using MCMC, also included in the summary are the Monte Carlo standard error (<code>se_mean</code>), the effective sample size (<code>n_eff</code>), and the R-hat statistic (<code>Rhat</code>).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(fit_summary$summary)</code></pre></div>
 <pre><code>                  mean    se_mean        sd        2.5%         25%
-mu         7.730108288 0.14459981 5.2790352  -2.6984757   4.5214611
-tau        6.560395227 0.15576523 5.4800694   0.2660985   2.5096618
-eta[1]     0.381533904 0.01723061 0.9318420  -1.5662024  -0.2411105
-eta[2]    -0.003358401 0.01370125 0.8557250  -1.7291088  -0.5588681
-eta[3]    -0.180840965 0.01451123 0.9006280  -1.9757967  -0.7915897
-eta[4]    -0.021804908 0.01489504 0.8868735  -1.7663254  -0.6045515
-eta[5]    -0.324228182 0.01686755 0.8782904  -2.0819417  -0.8969234
-eta[6]    -0.195979323 0.01668265 0.9010309  -1.9376042  -0.7872774
-eta[7]     0.341379230 0.01541481 0.8847003  -1.4115421  -0.2384917
-eta[8]     0.058103989 0.01523697 0.9515448  -1.8133143  -0.5790083
-theta[1]  11.418993427 0.17115257 8.4912715  -2.6253925   5.8261816
-theta[2]   7.813850430 0.10277459 6.3903433  -5.3102896   3.8984618
-theta[3]   6.145704585 0.13057239 7.7285078 -11.4550937   2.0436472
-theta[4]   7.697289867 0.10113953 6.6328798  -5.6733243   3.6479767
-theta[5]   5.206737769 0.10034706 6.3589070  -8.8386560   1.5225414
-theta[6]   6.199496135 0.10355810 6.7144151  -8.7253090   2.3573641
-theta[7]  10.551030087 0.12296316 6.8515160  -1.5664597   5.8842680
-theta[8]   8.363230638 0.13343344 7.9138340  -7.4963819   3.9057119
-lp__     -39.534379697 0.07311720 2.5428709 -45.1117655 -41.1286052
-                   50%         75%      97.5%    n_eff      Rhat
-mu         7.875041642  11.1832979  17.428528 1332.827 1.0027071
-tau        5.301537884   9.0992035  20.283176 1237.745 1.0025941
-eta[1]     0.420271014   1.0088080   2.119035 2924.712 1.0031447
-eta[2]     0.001063328   0.5648413   1.656638 3900.750 0.9998121
-eta[3]    -0.178767421   0.3957549   1.543455 3851.967 1.0001558
-eta[4]    -0.019159364   0.5722564   1.744822 3545.196 1.0016175
-eta[5]    -0.332673533   0.2391698   1.404413 2711.266 1.0001115
-eta[6]    -0.197767904   0.3955593   1.574759 2917.085 0.9999257
-eta[7]     0.358434061   0.9289171   2.067275 3293.941 0.9998881
-eta[8]     0.067735421   0.6937909   1.941039 3899.969 0.9996248
-theta[1]  10.249320615  15.6883767  31.636877 2461.380 1.0007903
-theta[2]   7.937282011  11.7585852  19.984375 3866.133 0.9996083
-theta[3]   6.767898149  10.7642962  20.147545 3503.391 1.0010309
-theta[4]   7.742414107  11.7095840  21.060924 4300.930 0.9999037
-theta[5]   5.648341206   9.5043183  16.536599 4015.648 1.0004567
-theta[6]   6.624236704  10.4407304  18.516141 4203.860 1.0004547
-theta[7]   9.904433956  14.5438293  25.626984 3104.726 1.0012889
-theta[8]   8.241043701  12.5224930  24.748478 3517.584 0.9997728
-lp__     -39.308604457 -37.7198374 -35.160655 1209.510 1.0023275</code></pre>
+mu         7.863884583 0.13700508 5.2321964  -2.0422915   4.6269794
+tau        6.599095132 0.16046573 5.7085456   0.2345065   2.4116847
+eta[1]     0.375229911 0.01514060 0.9381203  -1.5313749  -0.2151492
+eta[2]     0.004147385 0.01559322 0.8790939  -1.7521281  -0.5766739
+eta[3]    -0.199061848 0.01522928 0.9134201  -1.9233541  -0.8049536
+eta[4]    -0.039406372 0.01362912 0.8479632  -1.7511187  -0.6066509
+eta[5]    -0.370246352 0.01655953 0.8932633  -2.0846894  -0.9660010
+eta[6]    -0.204209067 0.01498057 0.8799825  -1.9172993  -0.7788366
+eta[7]     0.348635042 0.01697559 0.9111550  -1.4979758  -0.2043391
+eta[8]     0.062709382 0.01502139 0.9282725  -1.7781836  -0.5482978
+theta[1]  11.335275863 0.15664699 8.4281621  -2.2940551   5.8620102
+theta[2]   7.883719928 0.10284132 6.3925801  -5.1356249   3.9948330
+theta[3]   6.036301960 0.15676490 7.8803570 -12.3008577   1.8278046
+theta[4]   7.575273541 0.10199717 6.4364544  -5.3897602   3.6837216
+theta[5]   4.886665484 0.10579500 6.4088014  -9.6346894   1.1328775
+theta[6]   6.251944264 0.10720494 6.5528113  -7.7144651   2.3897055
+theta[7]  10.610438309 0.12460629 6.9284417  -1.4690289   6.0211123
+theta[8]   8.514287880 0.14635666 7.9547517  -7.1063146   3.9007457
+lp__     -39.537150705 0.07642424 2.6232606 -45.3329098 -41.1098461
+                  50%         75%      97.5%    n_eff      Rhat
+mu         7.77626346  11.0972178  18.581425 1458.461 1.0039599
+tau        5.28591218   9.1108242  21.028160 1265.571 1.0041627
+eta[1]     0.39427914   0.9970109   2.247871 3839.112 1.0009535
+eta[2]     0.01655031   0.5600328   1.726874 3178.329 1.0029754
+eta[3]    -0.22392990   0.4167847   1.647382 3597.346 1.0011706
+eta[4]    -0.03390189   0.5365456   1.591477 3870.958 0.9998946
+eta[5]    -0.39030913   0.2051930   1.449781 2909.800 1.0006403
+eta[6]    -0.21086457   0.3779280   1.597726 3450.575 1.0007759
+eta[7]     0.34287287   0.9354712   2.147667 2880.942 1.0003174
+eta[8]     0.06297143   0.6578275   1.961969 3818.832 1.0007991
+theta[1]  10.18327621  15.4053555  31.995808 2894.820 1.0005149
+theta[2]   7.84386632  11.8243242  20.981496 3863.822 1.0001433
+theta[3]   6.63421295  10.8045881  20.371353 2526.935 1.0009286
+theta[4]   7.63718913  11.4798972  20.620087 3982.146 1.0001086
+theta[5]   5.41247224   9.1606172  16.289103 3669.639 1.0011515
+theta[6]   6.65775950  10.4060349  18.794605 3736.162 1.0004816
+theta[7]   9.97535487  14.5480351  26.003608 3091.656 1.0004385
+theta[8]   8.17189454  12.5817082  25.800651 2954.121 1.0009291
+lp__     -39.27056233 -37.6887982 -35.097643 1178.204 1.0064082</code></pre>
 <p>If, for example, we wanted the only quantiles included to be 10% and 90%, and for only the parameters included to be <code>mu</code> and <code>tau</code>, we would specify that like this:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mu_tau_summary &lt;-<span class="st"> </span><span class="kw">summary</span>(fit, <span class="dt">pars =</span> <span class="kw">c</span>(<span class="st">&quot;mu&quot;</span>, <span class="st">&quot;tau&quot;</span>), <span class="dt">probs =</span> <span class="kw">c</span>(<span class="fl">0.1</span>, <span class="fl">0.9</span>))$summary
 <span class="kw">print</span>(mu_tau_summary)</code></pre></div>
 <pre><code>        mean   se_mean       sd       10%      90%    n_eff     Rhat
-mu  7.730108 0.1445998 5.279035 1.3110203 14.21195 1332.827 1.002707
-tau 6.560395 0.1557652 5.480069 0.9408529 13.58158 1237.745 1.002594</code></pre>
+mu  7.863885 0.1370051 5.232196 1.6079465 14.39235 1458.461 1.003960
+tau 6.599095 0.1604657 5.708546 0.9589362 13.54728 1265.571 1.004163</code></pre>
 <p>Since <code>mu_tau_summary</code> is a matrix we can pull out columns using their names:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mu_tau_80pct &lt;-<span class="st"> </span>mu_tau_summary[, <span class="kw">c</span>(<span class="st">&quot;10%&quot;</span>, <span class="st">&quot;90%&quot;</span>)]
 <span class="kw">print</span>(mu_tau_80pct)</code></pre></div>
 <pre><code>          10%      90%
-mu  1.3110203 14.21195
-tau 0.9408529 13.58158</code></pre>
+mu  1.6079465 14.39235
+tau 0.9589362 13.54728</code></pre>
 <p><br></p>
 </div>
 <div id="sampler-diagnostics" class="section level2">
@@ -254,10 +254,10 @@ sampler_params_chain1 &lt;-<span class="st"> </span>sampler_params[[<span class=
 <p>To do things like calculate the average value of <code>accept_stat__</code> for each chain (or the maximum value of <code>treedepth__</code> for each chain if using the NUTS algorithm, etc.) the <code>sapply</code> function is useful as it will apply the same function to each component of <code>sampler_params</code>:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mean_accept_stat_by_chain &lt;-<span class="st"> </span><span class="kw">sapply</span>(sampler_params, function(x) <span class="kw">mean</span>(x[, <span class="st">&quot;accept_stat__&quot;</span>]))
 <span class="kw">print</span>(mean_accept_stat_by_chain)</code></pre></div>
-<pre><code>[1] 0.7476184 0.8172834 0.8701314 0.8468849</code></pre>
+<pre><code>[1] 0.8623579 0.8631091 0.8363789 0.8016998</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">max_treedepth_by_chain &lt;-<span class="st"> </span><span class="kw">sapply</span>(sampler_params, function(x) <span class="kw">max</span>(x[, <span class="st">&quot;treedepth__&quot;</span>]))
 <span class="kw">print</span>(max_treedepth_by_chain)</code></pre></div>
-<pre><code>[1] 5 4 5 5</code></pre>
+<pre><code>[1] 5 5 5 6</code></pre>
 <p><br></p>
 </div>
 <div id="model-code" class="section level2">
@@ -298,25 +298,25 @@ model {
 inits_chain1 &lt;-<span class="st"> </span>inits[[<span class="dv">1</span>]]
 <span class="kw">print</span>(inits_chain1)</code></pre></div>
 <pre><code>$mu
-[1] -0.101288
+[1] 1.001
 
 $tau
-[1] 2.849633
+[1] 0.1748375
 
 $eta
-[1]  1.6564729 -1.9987074 -0.9162902 -1.9720027  1.7070757  0.7881628
-[7]  0.1425916 -1.4028452
+[1] -0.96097895 -0.48769618  0.53046695  0.90459315 -0.04889237  1.22326686
+[7] -0.88752200  1.48297866
 
 $theta
-[1]  4.6190525 -5.7968710 -2.7123790 -5.7207726  4.7632517  2.1446871
-[7]  0.3050457 -4.0988825</code></pre>
+[1] 0.8329847 0.9157323 1.0937454 1.1591567 0.9924517 1.2148728 0.8458278
+[8] 1.2602802</code></pre>
 <p><br></p>
 </div>
 <div id="prng-seed" class="section level2">
 <h2>(P)RNG seed</h2>
 <p>The <code>get_seed</code> function returns the (P)RNG seed as an integer:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">get_seed</span>(fit))</code></pre></div>
-<pre><code>[1] 1226905799</code></pre>
+<pre><code>[1] 699847790</code></pre>
 <p><br></p>
 </div>
 <div id="warmup-and-sampling-times" class="section level2">
@@ -324,10 +324,10 @@ $theta
 <p>The <code>get_elapsed_time</code> function returns a matrix with the warmup and sampling times for each chain:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">get_elapsed_time</span>(fit))</code></pre></div>
 <pre><code>          warmup   sample
-chain:1 0.032811 0.031925
-chain:2 0.032656 0.021643
-chain:3 0.031212 0.030269
-chain:4 0.034543 0.022889</code></pre>
+chain:1 0.038175 0.029291
+chain:2 0.037047 0.033903
+chain:3 0.033255 0.032134
+chain:4 0.030956 0.026188</code></pre>
 </div>
 
 

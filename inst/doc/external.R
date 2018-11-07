@@ -25,13 +25,14 @@ cat(readLines(system.file("include", "src", "stan", "model", "model_header.hpp",
 mc <- 
 '
 functions { real sinc(real x); }
-model {} // use the sinc() function somehow
+transformed data { real sinc_pi = sinc(pi()); }
 '
+stan_model(model_code = mc, model_name = "external", allow_undefined = TRUE,
+           includes = paste0('\n#include "', 
+                             file.path(getwd(), 'sinc.hpp'), '"\n'))
 
-## ------------------------------------------------------------------------
-#  stan_model(model_code = mc, model_name = "external", allow_undefined = TRUE,
-#             includes = paste0('\n#include "',
-#                               file.path(getwd(), 'sinc.hpp'), '"\n'))
+## ---- echo = FALSE, comment=""-------------------------------------------
+#  cat(readLines("sinc.hpp"), sep = "\n")
 
 ## ---- eval = TRUE--------------------------------------------------------
 try(readLines(stanc(model_code = mc, allow_undefined = TRUE)$cppcode))

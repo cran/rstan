@@ -1,8 +1,8 @@
 Package: rstan
 Type: Package
 Title: R Interface to Stan
-Version: 2.18.1
-Date: 2018-09-12
+Version: 2.18.2
+Date: 2018-11-06
 Authors@R: c(person("Jiqiang", "Guo", email = "guojq28@gmail.com", role = "aut"),
              person("Jonah", "Gabry", email = "jsg2201@columbia.edu", role = "aut"),
              person("Ben", "Goodrich", email = "benjamin.goodrich@columbia.edu", role = c("cre", "aut")),
@@ -12,8 +12,7 @@ Authors@R: c(person("Jiqiang", "Guo", email = "guojq28@gmail.com", role = "aut")
              person("Trustees of", "Columbia University", role = "cph"),
              person("Oleg", "Sklyar", role = "cph", comment = "R/cxxfunplus.R"),
              person("The R", "Core Team", role = "cph", comment = "R/pairs.R, R/dynGet.R"),
-             person("Jens", "Oehlschlaegel-Akiyoshi", role = "cph", comment = "R/pairs.R"),
-             person("Hadley", "Wickham", role = "cph", comment = "R/rtools.R"))
+             person("Jens", "Oehlschlaegel-Akiyoshi", role = "cph", comment = "R/pairs.R"))
 Description: User-facing R functions are provided to parse, compile, test,
     estimate, and analyze Stan models by accessing the header-only Stan library
     provided by the 'StanHeaders' package. The Stan project develops a probabilistic
@@ -38,7 +37,7 @@ BugReports: https://github.com/stan-dev/rstan/issues/
 VignetteBuilder: knitr
 SystemRequirements: pandoc
 RoxygenNote: 5.0.1
-Packaged: 2018-10-15 13:26:46 UTC; ben
+Packaged: 2018-11-07 02:20:53 UTC; ben
 Author: Jiqiang Guo [aut],
   Jonah Gabry [aut],
   Ben Goodrich [cre, aut],
@@ -48,8 +47,7 @@ Author: Jiqiang Guo [aut],
   Trustees of Columbia University [cph],
   Oleg Sklyar [cph] (R/cxxfunplus.R),
   The R Core Team [cph] (R/pairs.R, R/dynGet.R),
-  Jens Oehlschlaegel-Akiyoshi [cph] (R/pairs.R),
-  Hadley Wickham [cph] (R/rtools.R)
+  Jens Oehlschlaegel-Akiyoshi [cph] (R/pairs.R)
 Maintainer: Ben Goodrich <benjamin.goodrich@columbia.edu>
 Repository: CRAN
-Date/Publication: 2018-10-16 04:20:02 UTC
+Date/Publication: 2018-11-07 20:10:02 UTC
