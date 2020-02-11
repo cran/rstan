@@ -185,18 +185,6 @@ cxxfunctionplus <- function(sig = character(), body = character(),
     }
   }
   dso_last_path <- dso_path(fx)
-  if (grepl("^darwin", R.version$os) && grepl("clang4", get_CXX(FALSE))) {
-    cmd <- paste(
-      "install_name_tool",
-      "-change",
-      "/usr/local/clang4/lib/libc++.1.dylib",
-      "/usr/lib/libc++.1.dylib",
-      dso_last_path
-    )
-    system(cmd)
-    dyn.unload(dso_last_path)
-    dyn.load(dso_last_path)
-  }
   dso_bin <- if (save_dso) read_dso(dso_last_path) else raw(0)
   dso_filename <- sub("\\.[^.]*$", "", basename(dso_last_path)) 
   if (!is.list(sig))  { 

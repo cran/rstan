@@ -1,10 +1,10 @@
-## ----setup, include = FALSE----------------------------------------------
+## ----setup, include = FALSE---------------------------------------------------
 # Nothing
 
-## ---- eval = FALSE-------------------------------------------------------
+## ---- eval = FALSE------------------------------------------------------------
 #  output <- sbc(beta_binomial, data = list(N = 10, a = 1, b = 1), M = 500, refresh = 0)
 
-## ---- include = FALSE----------------------------------------------------
+## ---- include = FALSE---------------------------------------------------------
 # This fakes what would happen if we actually took the time to run Stan.
 N <- 10
 M <- 500
@@ -26,7 +26,7 @@ output <- list(ranks = ranks_, Y = y_, pars = pars_,
                log_lik = log_lik, sampler_params = sampler_params)
 class(output) <- "sbc"
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 print(output)
 plot(output, bins = 10) # it is best to specify the bins argument yourself
 

@@ -37,6 +37,6 @@ OUT <- 0
                         "rstan_options(auto_write = TRUE)")
   if (.Platform$OS.type == "windows")
     packageStartupMessage("For improved execution time, we recommend calling\n",
-                          "Sys.setenv(LOCAL_CPPFLAGS = '-march=native')\n",
+                          "Sys.setenv(LOCAL_CPPFLAGS = '-march=corei7 -mtune=corei7')\n",
                           "although this causes Stan to throw an error on a few processors.")
 }

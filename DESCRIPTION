@@ -2,8 +2,8 @@ Package: rstan
 Encoding: UTF-8
 Type: Package
 Title: R Interface to Stan
-Version: 2.19.2
-Date: 2019-07-08
+Version: 2.19.3
+Date: 2020-02-10
 Authors@R: c(person("Jiqiang", "Guo", email = "guojq28@gmail.com", role = "aut"),
              person("Jonah", "Gabry", email = "jsg2201@columbia.edu", role = "aut"),
              person("Ben", "Goodrich", email = "benjamin.goodrich@columbia.edu", role = c("cre", "aut")),
@@ -28,9 +28,9 @@ NeedsCompilation: yes
 Imports: methods, stats4, inline, gridExtra (>= 2.0.0), Rcpp (>=
         0.12.0), loo (>= 2.0.0), pkgbuild
 Depends: R (>= 3.4.0), StanHeaders (> 2.18.1), ggplot2 (>= 2.0.0)
-LinkingTo: Rcpp (>= 0.12.0), RcppEigen (>= 0.3.3.3.0), BH (>= 1.69.0),
-        StanHeaders (> 2.18.1)
-Suggests: RUnit, RcppEigen (>= 0.3.3.3.0), BH (>= 1.66), parallel,
+LinkingTo: Rcpp (>= 0.12.0), RcppEigen (>= 0.3.3.3.0), BH (>=
+        1.72.0-2), StanHeaders (> 2.18.1)
+Suggests: RUnit, RcppEigen (>= 0.3.3.3.0), BH (>= 1.72.0-2), parallel,
         KernSmooth, shinystan (>= 2.3.0), bayesplot (>= 1.5.0),
         rmarkdown, rstantools, rstudioapi, Matrix, knitr (>= 1.15.1)
 URL: http://discourse.mc-stan.org, http://mc-stan.org
@@ -38,7 +38,7 @@ BugReports: https://github.com/stan-dev/rstan/issues/
 VignetteBuilder: knitr
 SystemRequirements: GNU make, pandoc
 RoxygenNote: 5.0.1
-Packaged: 2019-07-09 07:03:28 UTC; ben
+Packaged: 2020-02-10 19:54:37 UTC; ben
 Author: Jiqiang Guo [aut],
   Jonah Gabry [aut],
   Ben Goodrich [cre, aut],
@@ -51,4 +51,4 @@ Author: Jiqiang Guo [aut],
   Jens Oehlschlaegel-Akiyoshi [cph] (R/pairs.R)
 Maintainer: Ben Goodrich <benjamin.goodrich@columbia.edu>
 Repository: CRAN
-Date/Publication: 2019-07-09 12:40:03 UTC
+Date/Publication: 2020-02-11 13:02:41 UTC

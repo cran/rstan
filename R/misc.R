@@ -364,7 +364,7 @@ config_argss <- function(chains, iter, warmup, thin,
   if (thin < 1 || thin > iter)
     stop("parameter 'thin' should be a positive integer less than 'iter'")
   warmup <- max(0, as.integer(warmup))
-  if (warmup > iter)
+  if (warmup >= iter)
     stop("parameter 'warmup' should be an integer less than 'iter'")
   chains <- as.integer(chains)
   if (chains < 1)
@@ -954,8 +954,8 @@ get_par_summary <- function(sim, n, probs = default_summary_probs()) {
                  if (sim$warmup2[i] == 0) sim$samples[[i]][[n]]
                  else sim$samples[[i]][[n]][-(1:sim$warmup2[i])]
                })
-  msdfun <- function(chain) c(mean(chain), sd(chain))
-  qfun <- function(chain) quantile(chain, probs = probs)
+  msdfun <- function(chain) c(mean(chain, na.rm = TRUE), sd(chain, na.rm = TRUE))
+  qfun <- function(chain) quantile(chain, probs = probs, na.rm = TRUE)
   c_msd <- unlist(lapply(ss, msdfun), use.names = FALSE)
   c_quan <- unlist(lapply(ss, qfun), use.names = FALSE)
   ass <- do.call(c, ss)
@@ -971,7 +971,7 @@ get_par_summary_msd <- function(sim, n) {
                  if (sim$warmup2[i] == 0) sim$samples[[i]][[n]]
                  else sim$samples[[i]][[n]][-(1:sim$warmup2[i])]
                })
-  sumfun <- function(chain) c(mean(chain), sd(chain))
+  sumfun <- function(chain) c(mean(chain, na.rm = TRUE), sd(chain, na.rm = TRUE))
   cs <- lapply(ss, sumfun)
   as <- sumfun(do.call(c, ss))
   list(msd = as, c_msd = unlist(cs, use.names = FALSE))
@@ -984,7 +984,7 @@ get_par_summary_quantile <- function(sim, n, probs = default_summary_probs()) {
                  if (sim$warmup2[i] == 0) sim$samples[[i]][[n]]
                  else sim$samples[[i]][[n]][-(1:sim$warmup2[i])]
                })
-  sumfun <- function(chain) quantile(chain, probs = probs)
+  sumfun <- function(chain) quantile(chain, probs = probs, na.rm = TRUE)
   cs <- lapply(ss, sumfun)
   as <- sumfun(do.call(c, ss))
   list(quan = as, c_quan = unlist(cs, use.names = FALSE))
@@ -1025,7 +1025,6 @@ combine_msd_quan <- function(msd, quan) {
 
 
 summary_sim <- function(sim, pars, probs = default_summary_probs()) {
-  # cat("summary_sim is called.\n")
   probs_len <- length(probs)
   pars <- if (missing(pars)) sim$pars_oi else check_pars_second(sim, pars)
   tidx <- pars_total_indexes(sim$pars_oi, sim$dims_oi, sim$fnames_oi, pars)
@@ -1511,6 +1510,7 @@ read_csv_header <- function(f, comment.char = '#') {
   iter.count <- NA
   save.warmup <- FALSE
   sample.count <- NA_integer_
+  thin <- NULL
   while (length(input <- readLines(con, n = 1)) > 0) {
     niter <- niter + 1
     if (!grepl(comment.char, input)) break;
@@ -1524,11 +1524,17 @@ read_csv_header <- function(f, comment.char = '#') {
     } else {
       warmup.count <- 0L
     }
+    if (grepl("#.*thin", input)){
+      thin <- as.integer(gsub("[^0-9]*([0-9]*).*", "\\1", input))
+    }
     if (grepl("#.*save_warmup",input)){
       save.warmup <- !grepl("0",input)
     }
     if (grepl("#.*output_sample",input)){
       iter.count <- as.numeric(gsub("[^0-9]*([0-9]*).*","\\1",input))
+    }
+    if (!is.null(thin)) {
+      iter.count <- iter.count %/% thin
     }
 
   }
