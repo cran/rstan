@@ -128,7 +128,7 @@ stan_model <- function(file,
   model_name <- stanc_ret$model_name 
   model_code <- stanc_ret$model_code 
   model_cppcode <- stanc_ret$cppcode
-  inc <- paste("#define STAN__SERVICES__COMMAND_HPP",
+  inc <- paste("#define STAN__SERVICES__COMMAND_HPP\n",
                # include, stanc_ret$cppcode,
                "#include <boost/integer/integer_log2.hpp>\n",
                "#include <rstan/rstaninc.hpp>\n", 
