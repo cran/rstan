@@ -8,11 +8,11 @@
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <meta name="author" content="Stan Development Team" />
 
-<meta name="date" content="2020-02-10" />
+<meta name="date" content="2020-07-07" />
 
 <title>Interfacing with External C++ Code</title>
 
@@ -117,9 +117,6 @@ padding-right: 2em;
 font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 font-size: 14px;
 line-height: 1.35;
-}
-#header {
-text-align: center;
 }
 #TOC {
 clear: both;
@@ -288,7 +285,8 @@ code > span.st { color: #d14; }
 code > span.co { color: #888888; font-style: italic; } 
 code > span.ot { color: #007020; } 
 code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
@@ -303,7 +301,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">Interfacing with External C++ Code</h1>
 <h4 class="author">Stan Development Team</h4>
-<h4 class="date">2020-02-10</h4>
+<h4 class="date">2020-07-07</h4>
 
 
 
@@ -334,7 +332,7 @@ model {} // use the complicated() function somehow</code></pre>
 <a class="sourceLine" id="cb3-6" title="6"><span class="kw">try</span>(<span class="kw">stan_model</span>(<span class="dt">model_code =</span> mc, <span class="dt">model_name =</span> <span class="st">&quot;parser_error&quot;</span>), <span class="dt">silent =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
 <pre><code>## SYNTAX ERROR, MESSAGE(S) FROM PARSER:</code></pre>
 <pre><code>## Function declared, but not defined. Function name=fib</code></pre>
-<pre><code>##  error in 'model358dc80d133_parser_error' at line 2, column 29</code></pre>
+<pre><code>##  error in 'model9e8376a10ac_parser_error' at line 2, column 29</code></pre>
 <pre><code>##   -------------------------------------------------</code></pre>
 <pre><code>##      1:</code></pre>
 <pre><code>##      2: functions { int fib(int n); }</code></pre>
@@ -387,6 +385,8 @@ model {} // use the complicated() function somehow</code></pre>
 #include &lt;stan/io/writer.hpp&gt;
 
 #include &lt;stan/lang/rethrow_located.hpp&gt;
+#include &lt;stan/model/model_base.hpp&gt;
+#include &lt;stan/model/model_base_crtp.hpp&gt;
 #include &lt;stan/model/prob_grad.hpp&gt;
 #include &lt;stan/model/indexing.hpp&gt;
 #include &lt;stan/services/util/create_rng.hpp&gt;
@@ -421,7 +421,7 @@ model {} // use the complicated() function somehow</code></pre>
   return n &lt;= 2 ? 1 : fib(n - 1) + fib(n - 2);
 }</code></pre>
 <p>parses to. Thus, there is no <em>speed</em> advantage to defining the <code>fib</code> function in the external fib.hpp file. However, it is possible to use an external C++ file to handle the gradient of a function analytically as opposed to using Stan’s autodifferentiation capabilities, which are slower and more memory intensive but fully general. In this case, the <code>fib</code> function only deals with integers so there is nothing to take the derivative of. The primary advantage of using an external C++ file is flexibility to do things that cannot be done directly in the Stan language. It is also useful for R packages like <strong>rstanarm</strong> that may want to define some C++ functions in the package’s src directory and rely on the linker to make them available in its Stan programs, which are compiled at (or before) installation time.</p>
-<p>In the C++ version, we check if <code>n</code> is non-positive, in which case we throw an exception. It is unnecessary to prefix <code>stringstream</code> with <code>std::</code> because of the <code>using std::stringstream;</code> line in the <em>generated</em> C++ file. However, there is no corresponding <code>using std::domain_error;</code> line, so it has to be qualified appropriately when the exception is thrown.</p>
+<p>In the C++ version, we check if <code>n</code> is non-positive, in which case we throw an exception. The way the MCMC samplers are configured, if there is an exception thrown and it is <code>std::domain_error</code>, it will treat that iteration as a rejection but as a recoverable error: set that iteration’s log probability value to negative infinity and move to the next iteration. If there is a <code>std::invalid_argument</code> thrown, MCMC terminates. We treat these as non-recoverable, user programming errors. It is unnecessary to prefix <code>stringstream</code> with <code>std::</code> because of the <code>using std::stringstream;</code> line in the <em>generated</em> C++ file. However, there is no corresponding <code>using std::domain_error;</code> line, so it has to be qualified appropriately when the exception is thrown.</p>
 <p>The only confusing part of the C++ version of the <code>fib</code> function is that it has an additional argument (with no default value) named <code>pstream__</code> that is added to the <em>declaration</em> of the <code>fib</code> function by Stan. Thus, your <em>definition</em> of the <code>fib</code> function needs to match with this signature. This additional argument is a pointer to a <code>std::ostream</code> and is only used if your function prints something to the screen, which is rare. Thus, when we call the <code>fib</code> function recursively in the last line, we specify <code>fib(n - 1, 0) + fib(n - 2, 0);</code> so that the output (if any, and in this case there is none) is directed to the null pointer.</p>
 <p>This vignette has employed a toy example with the Fibonacci function, which has little apparent use in a Stan program and if it were useful, would more easily be implemented as a user-defined function in the <code>functions</code> block as illustrated at the outset. The ability to use external C++ code only becomes useful with more complicated C++ functions. It goes without saying that this mechanism ordinarily cannot call functions in C, Fortran, R, or other languages because Stan needs the derivatives with respect to unknown parameters in order to perform estimation. These derivatives are handled with custom C++ types that cannot be processed by functions in other languages that only handle primitive types such as <code>double</code>, <code>float</code>, etc.</p>
 <p>That said, it is possible to accomplish a great deal in C++, particularly when utilizing the Stan Math Library. For more details, see <a href="https://arxiv.org/abs/1509.07164">The Stan Math Library: Reverse-Mode Automatic Differentiation in C++</a> and its GitHub <a href="https://github.com/stan-dev/math/">repository</a>. The functions that you <em>declare</em> in the <code>functions</code> block of a Stan program will typically involve templating and type promotion in their signatures when parsed to C++ (the only exceptions are functions whose only arguments are integers, as in the <code>fib</code> function above). Suppose you wanted to define a function whose arguments are real numbers (or at least one of the arguments is). For example,</p>
@@ -438,11 +438,11 @@ model {} // use the complicated() function somehow</code></pre>
 <p>The last lines of sinc.hpp are a specialization for when the input is an unknown real parameter, which is represented in the Stan Math Library as a <code>stan::math::var</code>. Since the derivative of the <code>sinc</code> function is easy to compute analytically, we extract the underlying double-precision value from the inputted <code>stan::math::var</code> and use that to calculate the function value and its first derivative. Then, we return the result of <code>precomputed_gradients</code>, whose arguments are the function value (<code>f</code>), the derivative of <code>x</code> with respect to any other parameters (<code>x.vi_</code>), and the first derivative of <code>f</code> (<code>dfdx_</code>). The latter two are actually <code>std::vector</code>s but only have one element each because there is only one unknown.</p>
 <p>An easy way to see what the generated function signature will be is to call the <code>stanc</code> function in the <strong>rstan</strong> package with <code>allow_undefined = TRUE</code> and inspect the resuling C++ code. In this case, I first did</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" title="1"><span class="kw">try</span>(<span class="kw">readLines</span>(<span class="kw">stanc</span>(<span class="dt">model_code =</span> mc, <span class="dt">allow_undefined =</span> <span class="ot">TRUE</span>)<span class="op">$</span>cppcode))</a></code></pre></div>
-<pre><code>## Warning in file(con, &quot;r&quot;): cannot open file '// Code generated by Stan version 2.19.1
+<pre><code>## Warning in file(con, &quot;r&quot;): cannot open file '// Code generated by Stan version 2.21.0
 ## 
 ## #include &lt;stan/model/model_header.hpp&gt;
 ## 
-## namespace model358d36257d45_mc_namespace {
+## namespace model9e87b53bd23_mc_namespace {
 ## 
 ## using std::istream;
 ## using std::string;
@@ -457,8 +457,8 @@ model {} // use the complicated() function somehow</code></pre>
 ## 
 ## stan::io::program_reader prog_reader__() {
 ##     stan::io::program_reader reader;
-##     reader.add_event(0, 0, &quot;start&quot;, &quot;model358d36257d45_mc&quot;);
-##     reader.add_event(5, 3, &quot;end&quot;, &quot;model358d36257d45_mc&quot;);
+##     reader.add_event(0, 0, &quot;start&quot;, &quot;model9e87b53bd23_mc&quot;);
+##     reader.add_event(5, 3, &quot;end&quot;, &quot;model9e87b53bd23_mc&quot;);
 ##     return reader;
 ## }
 ## 
@@ -466,17 +466,15 @@ model {} // use the complicated() function somehow</code></pre>
 ## typename boost::math::tools::promote_args&lt;T0__&gt;::type
 ## sinc(const T0__&amp; x, std::ostream* pstream__);
 ## 
-## class model358d36257d45_mc : public prob_grad {
+## class model9e87b53bd23_mc
+##   : public stan::model::model_base_crtp&lt;model9e87b53bd23_mc&gt; {
 ## private:
 ##         double sinc_pi;
 ## public:
-##     model358d36257d45_mc(stan::io::var_context&amp; context__,
+##     model9e87b53bd23_mc(stan::io::var_context&amp; context__,
 ##         std::ostream* pstream__ = 0)
-##         : prob_grad(0) {
-##         ctor_body(context__, 0, pstream__);
-##     }
-## 
-##     model358d36257 [... truncated]</code></pre>
+##         : model_base_crtp(0) {
+##         ctor_body(context_ [... truncated]</code></pre>
 <pre><code>## Error in file(con, &quot;r&quot;) : cannot open the connection</code></pre>
 <p>to see what function signatures needed to be written for sinc.hpp.</p>
 <p>Once you go to the trouble of writing a numerically stable C++ function, we would welcome a pull request on GitHub to include your C++ function in the Stan Math Library for everyone to benefit from, provided that it can be licensed under the 3-clause BSD license and its use is not overly-specific to your particular Stan program.</p>

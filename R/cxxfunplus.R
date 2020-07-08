@@ -82,10 +82,11 @@ cxxfun_from_dso_bin <- function(dso) {
   # write the raw vector containing the dso file to temporary file
   writeBin(dso@.CXXDSOMISC$dso_bin, libLFile) 
   cleanup <- function(env) {
-    if (f %in% names(getLoadedDLLs())) dyn.unload(libLFile)
+    if (file.exists(libLFile) && f %in% names(getLoadedDLLs()))
+      dyn.unload(libLFile)
     unlink(libLFile)
   }
-  reg.finalizer(environment(), cleanup, onexit = FALSE)
+#  reg.finalizer(environment(), cleanup, onexit = FALSE)
   DLL <- dyn.load(libLFile) 
   assign('dso_last_path', libLFile, dso@.CXXDSOMISC) 
   res <- vector("list", length(sig))
@@ -185,6 +186,20 @@ cxxfunctionplus <- function(sig = character(), body = character(),
     }
   }
   dso_last_path <- dso_path(fx)
+  if (grepl("^darwin", R.version$os) && grepl("clang", get_CXX(FALSE))) {
+    CLANG_DIR = tail(n = 1, grep("clang[456789]", value = TRUE,
+                                 x = list.dirs("/usr/local", recursive = FALSE)))
+    Rv <- R.version
+    GOOD <- file.path("/Library", "Frameworks", "R.framework", "Versions", 
+                      paste(Rv$major, substr(Rv$minor, 1, 1), sep = "."), 
+                      "Resources", "lib", "libc++.1.dylib")
+    if (length(CLANG_DIR) == 1L && file.exists(GOOD)) {                 
+      cmd <- paste("install_name_tool", "-change", CLANG_DIR, GOOD, dso_last_path)
+      system(cmd)
+      dyn.unload(dso_last_path)
+      dyn.load(dso_last_path)
+    }
+  }
   dso_bin <- if (save_dso) read_dso(dso_last_path) else raw(0)
   dso_filename <- sub("\\.[^.]*$", "", basename(dso_last_path)) 
   if (!is.list(sig))  { 

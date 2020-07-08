@@ -25,7 +25,6 @@ expose_stan_functions_hacks <- function(code, includes = NULL) {
                 "#include <exporter.h>",
                 "#include <RcppEigen.h>",
                 code, sep = "\n")
-
   code <- gsub("// [[stan::function]]", 
                "// [[Rcpp::export]]", code, fixed = TRUE)
   code <- gsub("stan::math::accumulator<double>& lp_accum__, std::ostream* pstream__ = nullptr){", 

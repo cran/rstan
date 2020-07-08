@@ -1,7 +1,7 @@
 ## ----setup, include=FALSE-----------------------------------------------------
 library(rstan)
 knitr::opts_chunk$set(
-  echo = TRUE, eval = FALSE
+  echo = TRUE, eval = FALSE, error = TRUE
 )
 
 ## ---- eval = TRUE-------------------------------------------------------------

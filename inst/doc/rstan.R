@@ -1,7 +1,7 @@
 ## ----setup, include=FALSE-----------------------------------------------------
 library(rstan)
 knitr::opts_chunk$set(
-  echo = TRUE,
+  echo = TRUE, error = TRUE,
   comment = NA,
   fig.align = "center",
   fig.height = 5,
@@ -30,7 +30,7 @@ fit1 <- stan(
   chains = 4,             # number of Markov chains
   warmup = 1000,          # number of warmup iterations per chain
   iter = 2000,            # total number of iterations per chain
-  cores = 2,              # number of cores (could use one per chain)
+  cores = 1,              # number of cores (could use one per chain)
   refresh = 0             # no progress shown
   )
 

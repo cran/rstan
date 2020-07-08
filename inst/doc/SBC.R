@@ -1,5 +1,6 @@
 ## ----setup, include = FALSE---------------------------------------------------
-# Nothing
+library(rstan)
+knitr::opts_chunk$set(eval = .Platform$OS.type != "windows")
 
 ## ---- eval = FALSE------------------------------------------------------------
 #  output <- sbc(beta_binomial, data = list(N = 10, a = 1, b = 1), M = 500, refresh = 0)

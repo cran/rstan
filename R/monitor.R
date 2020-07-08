@@ -83,7 +83,7 @@ z_scale <- function(x) {
   S <- length(x)
   r <- rank(x, ties.method = 'average')
   z <- qnorm((r - 1 / 2) / S)
-  z[is.na(x)] <- NA_real_
+  z[is.na(x)] <- NA
   if (!is.null(dim(x))) {
     # output should have the input dimension
     z <- array(z, dim = dim(x), dimnames = dimnames(x))
@@ -108,7 +108,7 @@ u_scale <- function(x) {
   S <- length(x)
   r <- rank(x, ties.method = 'average')
   u <- (r - 1 / 2) / S
-  u[is.na(x)] <- NA_real_
+  u[is.na(x)] <- NA
   if (!is.null(dim(x))) {
     # output should have the input dimension
     u <- array(u, dim = dim(x), dimnames = dimnames(x))
@@ -131,7 +131,7 @@ u_scale <- function(x) {
 r_scale <- function(x) {
   S <- length(x)
   r <- rank(x, ties.method = 'average')
-  r[is.na(x)] <- NA_real_
+  r[is.na(x)] <- NA
   if (!is.null(dim(x))) {
     # output should have the input dimension
     r <- array(r, dim = dim(x), dimnames = dimnames(x))
@@ -171,12 +171,15 @@ is_constant <- function(x, tol = .Machine$double.eps) {
 #' localization: An improved R-hat for assessing convergence of
 #' MCMC. \emph{arXiv preprint} \code{arXiv:1903.08008}.
 rhat_rfun <- function(sims) {
-  if (anyNA(sims))
+  if (anyNA(sims)) {
     return(NA)
-  if (any(!is.finite(sims)))
+  }
+  if (any(!is.finite(sims))) {
+    return(NaN)
+  }
+  if (is_constant(sims)) {
     return(NA)
-  else if (is_constant(sims))
-    return(NA)
+  }
   if (is.vector(sims)) {
     dim(sims) <- c(length(sims), 1)
   }
@@ -213,13 +216,15 @@ ess_rfun <- function(sims) {
   }
   chains <- ncol(sims)
   n_samples <- nrow(sims)
-  if (n_samples < 3L || anyNA(sims))
-    return(NA)
-  if (any(!is.finite(sims))) {
+  if (n_samples < 3L || anyNA(sims)) {
     return(NA)
   }
-  else if (is_constant(sims))
+  if (any(!is.finite(sims))) {
+    return(NaN)
+  }
+  if (is_constant(sims)) {
     return(NA)
+  }
   acov <- lapply(seq_len(chains), function(i) autocovariance(sims[, i]))
   acov <- do.call(cbind, acov)
   chain_mean <- apply(sims, 2, mean)
@@ -335,9 +340,9 @@ ess_bulk <- function(sims) {
 #' 
 #' @export
 ess_tail <- function(sims) {
-  I05 <- sims <= quantile(sims, probs = 0.05, na.rm = TRUE)
+  I05 <- sims <= quantile(sims, 0.05, na.rm = TRUE)
   q05_ess <- ess_rfun(split_chains(I05))
-  I95 <- sims <= quantile(sims, probs = 0.95, na.rm = TRUE)
+  I95 <- sims <= quantile(sims, 0.95, na.rm = TRUE)
   q95_ess <- ess_rfun(split_chains(I95))
   min(q05_ess, q95_ess)
 }
@@ -361,7 +366,7 @@ ess_tail <- function(sims) {
 #' 
 #' @export
 ess_quantile <- function(sims, prob) {
-  I <- sims <= quantile(sims, probs = prob, na.rm = TRUE)
+  I <- sims <= quantile(sims, prob, na.rm = TRUE)
   ess_rfun(split_chains(I))
 }
 
@@ -618,7 +623,7 @@ monitor <- function(sims, warmup = floor(dim(sims)[1] / 2),
   out[valid & !is.finite(out[, "Tail_ESS"]), "Tail_ESS"] <- S
   SE_vars <- colnames(out)[grepl("^SE_", colnames(out), ignore.case = TRUE)]
   for (v in SE_vars) {
-    out[valid & !is.finite(out[, v]), v] <- 0
+  	out[valid & !is.finite(out[, v]), v] <- 0
   }
   
   out <- structure(
