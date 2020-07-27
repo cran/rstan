@@ -112,16 +112,25 @@ rstanplugin <- function() {
   if (!is.null(tbbmalloc_proxyDllInfo))
       tbb_libs <- paste(tbb_libs, "-ltbbmalloc -ltbbmalloc_proxy")
 
-  list(includes = '// [[Rcpp::plugins(cpp14)]]\n',
-       body = function(x) x,
-       env = list(PKG_LIBS = paste(rcpp_pkg_libs,
-                                   rstan_StanServices,
-                                   paste0("-L", shQuote(StanHeaders_pkg_libs)),
-                                   "-lStanHeaders",
-                                   paste0("-L", shQuote(RcppParallel_pkg_libs)),
-                                   tbb_libs),
-                  PKG_CPPFLAGS = paste(Rcpp_plugin$env$PKG_CPPFLAGS,
-                                       PKG_CPPFLAGS_env_fun(), collapse = " ")))
+  PL <- paste(rcpp_pkg_libs,
+              shQuote(rstan_StanServices),
+              paste0("-L", shQuote(StanHeaders_pkg_libs)),
+              "-lStanHeaders",
+              paste0("-L", shQuote(RcppParallel_pkg_libs)),
+              tbb_libs)
+  if (.Platform$OS.type == "windows") {
+    list(includes = '// [[Rcpp::plugins(cpp14)]]\n',
+         body = function(x) x,
+         env = list(LOCAL_LIBS = PL,
+                    PKG_CPPFLAGS = paste(Rcpp_plugin$env$PKG_CPPFLAGS,
+                                         PKG_CPPFLAGS_env_fun(), collapse = " ")))
+  } else {
+    list(includes = '// [[Rcpp::plugins(cpp14)]]\n',
+         body = function(x) x,
+         env = list(PKG_LIBS = PL,
+                    PKG_CPPFLAGS = paste(Rcpp_plugin$env$PKG_CPPFLAGS,
+                                         PKG_CPPFLAGS_env_fun(), collapse = " ")))
+  }
 }
 
 

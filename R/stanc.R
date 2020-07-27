@@ -56,7 +56,8 @@ stanc <- function(file, model_code = '', model_name = "anon_model",
   if (r$status == SUCCESS_RC && verbose)
     cat("successful in parsing the Stan model '", model_name, "'.\n", sep = '')
   r$status = !as.logical(r$status)
-  if (interactive() && !allow_undefined) try(stanc_beta(model_code, model_name, isystem))
+  if (interactive() && !allow_undefined && rstan_options("javascript")) 
+    try(stanc_beta(model_code, model_name, isystem))
   return(r)
 }
 
@@ -114,25 +115,21 @@ stanc_beta <- function(model_code, model_name, isystem) {
     model_code <- gsub('#include (.*$)', '#include "\\1"', model_code)
   unprocessed <- tempfile(fileext = ".stan")
   processed <- tempfile(fileext = ".stan")
-  on.exit(file.remove(c(unprocessed, processed)))
+  on.exit(file.remove(unprocessed))
   writeLines(model_code, con = unprocessed)
   ARGS <- paste("-E -nostdinc -x c++ -P -C", 
                 paste("-I", isystem, " ", collapse = ""), 
                 "-o", processed, unprocessed)
   CXX <- get_CXX()
-  pkgbuild::with_build_tools(system2(CXX, args = ARGS), 
+  CXX <- sub("[[:space:]]+-.*$", "", CXX)
+  pkgbuild::with_build_tools(system(paste(CXX, ARGS), 
+                                    ignore.stdout = TRUE, ignore.stderr = TRUE),
                              required = rstan_options("required") && 
                                identical(Sys.getenv("WINDOWS"), "TRUE") &&
                               !identical(Sys.getenv("R_PACKAGE_SOURCE"), "") )
   if (file.exists(processed)) {
+    on.exit(file.remove(processed), add = TRUE)
     model_code <- paste(readLines(processed), collapse = "\n")
-  } else {
-    message("The NEXT version of Stan will not be able to pre-process your Stan program.\n", 
-            "Please open an issue at\n https://github.com/stan-dev/stanc3/issues \nif you can ",
-            "share or at least describe your Stan program. This will help ensure that Stan\n",
-            "continues to work on your Stan programs in the future. Thank you!\n",
-            "This message can be avoided by wrapping your function call inside suppressMessages().")
-    return(character())
   }
   timeout <- options()$timeout
   on.exit(options(timeout = timeout), add = TRUE)
@@ -141,12 +138,17 @@ stanc_beta <- function(model_code, model_name, isystem) {
   ctx$source("https://github.com/stan-dev/stanc3/releases/download/nightly/stanc.js")
   model_cppcode <- try(ctx$call("stanc", model_name, paste(model_code, collapse = "\n")), silent = TRUE)
   if (inherits(model_cppcode, "try-error") || length(model_cppcode$errors)) {
-    message("The NEXT version of Stan will not be able to parse your Stan program.\n", 
-            "Please open an issue at\n https://github.com/stan-dev/stanc3/issues \nif you can ",
-            "share or at least describe your Stan program. This will help ensure that Stan\n",
-            "continues to work on your Stan programs in the future. Thank you!\n",
-            "This message can be avoided by wrapping your function call inside suppressMessages().\n",
-            model_cppcode$errors[2])
+        message("When you compile models, you are also contributing to development of the NEXT\n",
+            "Stan compiler. In this version of rstan, we compile your model as usual, but\n",
+            "also test our new compiler on your syntactically correct model. In this case,\n", 
+            "the new compiler did not work like we hoped. By filing an issue at\n",
+            "https://github.com/stan-dev/stanc3/issues with your model\n",
+            "or a minimal example that shows this warning you will be contributing\n",
+            "valuable information to Stan and ensuring your models continue working.",
+            " Thank you!\n",
+            "This message can be avoided by wrapping your function call inside suppressMessages()\n",
+            " or by first calling rstan_options(javascript = FALSE).\n",
+            if (is.list(model_cppcode)) model_cppcode$errors[2] else model_cppcode)
     return(FALSE)
   }
   

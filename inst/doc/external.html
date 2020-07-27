@@ -12,7 +12,7 @@
 
 <meta name="author" content="Stan Development Team" />
 
-<meta name="date" content="2020-07-07" />
+<meta name="date" content="2020-07-26" />
 
 <title>Interfacing with External C++ Code</title>
 
@@ -301,7 +301,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Interfacing with External C++ Code</h1>
 <h4 class="author">Stan Development Team</h4>
-<h4 class="date">2020-07-07</h4>
+<h4 class="date">2020-07-26</h4>
 
 
 
@@ -332,7 +332,7 @@ model {} // use the complicated() function somehow</code></pre>
 <a class="sourceLine" id="cb3-6" title="6"><span class="kw">try</span>(<span class="kw">stan_model</span>(<span class="dt">model_code =</span> mc, <span class="dt">model_name =</span> <span class="st">&quot;parser_error&quot;</span>), <span class="dt">silent =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
 <pre><code>## SYNTAX ERROR, MESSAGE(S) FROM PARSER:</code></pre>
 <pre><code>## Function declared, but not defined. Function name=fib</code></pre>
-<pre><code>##  error in 'model9e8376a10ac_parser_error' at line 2, column 29</code></pre>
+<pre><code>##  error in 'model37e449c6658_parser_error' at line 2, column 29</code></pre>
 <pre><code>##   -------------------------------------------------</code></pre>
 <pre><code>##      1:</code></pre>
 <pre><code>##      2: functions { int fib(int n); }</code></pre>
@@ -442,7 +442,7 @@ model {} // use the complicated() function somehow</code></pre>
 ## 
 ## #include &lt;stan/model/model_header.hpp&gt;
 ## 
-## namespace model9e87b53bd23_mc_namespace {
+## namespace model37e42ccd290c_mc_namespace {
 ## 
 ## using std::istream;
 ## using std::string;
@@ -457,8 +457,8 @@ model {} // use the complicated() function somehow</code></pre>
 ## 
 ## stan::io::program_reader prog_reader__() {
 ##     stan::io::program_reader reader;
-##     reader.add_event(0, 0, &quot;start&quot;, &quot;model9e87b53bd23_mc&quot;);
-##     reader.add_event(5, 3, &quot;end&quot;, &quot;model9e87b53bd23_mc&quot;);
+##     reader.add_event(0, 0, &quot;start&quot;, &quot;model37e42ccd290c_mc&quot;);
+##     reader.add_event(5, 3, &quot;end&quot;, &quot;model37e42ccd290c_mc&quot;);
 ##     return reader;
 ## }
 ## 
@@ -466,15 +466,15 @@ model {} // use the complicated() function somehow</code></pre>
 ## typename boost::math::tools::promote_args&lt;T0__&gt;::type
 ## sinc(const T0__&amp; x, std::ostream* pstream__);
 ## 
-## class model9e87b53bd23_mc
-##   : public stan::model::model_base_crtp&lt;model9e87b53bd23_mc&gt; {
+## class model37e42ccd290c_mc
+##   : public stan::model::model_base_crtp&lt;model37e42ccd290c_mc&gt; {
 ## private:
 ##         double sinc_pi;
 ## public:
-##     model9e87b53bd23_mc(stan::io::var_context&amp; context__,
+##     model37e42ccd290c_mc(stan::io::var_context&amp; context__,
 ##         std::ostream* pstream__ = 0)
 ##         : model_base_crtp(0) {
-##         ctor_body(context_ [... truncated]</code></pre>
+##         ctor_body(co [... truncated]</code></pre>
 <pre><code>## Error in file(con, &quot;r&quot;) : cannot open the connection</code></pre>
 <p>to see what function signatures needed to be written for sinc.hpp.</p>
 <p>Once you go to the trouble of writing a numerically stable C++ function, we would welcome a pull request on GitHub to include your C++ function in the Stan Math Library for everyone to benefit from, provided that it can be licensed under the 3-clause BSD license and its use is not overly-specific to your particular Stan program.</p>
