@@ -2,7 +2,7 @@
 \alias{stan}
 \title{Fit a model with Stan}
 \description{
-\if{html}{\figure{stanlogo.png}{options: width="25px" alt="http://mc-stan.org/about/logo/"}}
+\if{html}{\figure{stanlogo.png}{options: width="25px" alt="https://mc-stan.org/about/logo/"}}
 Fit a model defined in the Stan modeling language and  
 return the fitted result as an instance of \code{stanfit}. 
 }
@@ -210,13 +210,15 @@ stan(file, model_name = "anon_model", model_code = "", fit = NA,
     In addition, algorithm HMC (called 'static HMC' in Stan) and NUTS share the
     following parameters:
     \itemize{
-      \item \code{stepsize} (\code{double}, positive)
-      \item \code{stepsize_jitter} (\code{double}, [0,1])
-      \item \code{metric} (\code{string}, one of "unit_e", "diag_e", "dense_e")
+      \item \code{stepsize} (\code{double}, positive, defaults to 1) 
+        Note: this controls the \emph{initial} stepsize only, unless \code{adapt_engaged=FALSE}.
+      \item \code{stepsize_jitter} (\code{double}, [0,1], defaults to 0)
+      \item \code{metric} (\code{string}, one of "unit_e", "diag_e", "dense_e", 
+      defaults to "diag_e")
     }
     For algorithm NUTS, we can also set:
     \itemize{
-      \item \code{max_treedepth} (\code{integer}, positive)
+      \item \code{max_treedepth} (\code{integer}, positive, defaults to 10)
     }
     For algorithm HMC, we can also set:
     \itemize{
@@ -399,16 +401,16 @@ stan(file, model_name = "anon_model", model_code = "", fit = NA,
 \references{
   The Stan Development Team 
   \emph{Stan Modeling Language User's Guide and Reference Manual}. 
-  \url{http://mc-stan.org}. 
+  \url{https://mc-stan.org}. 
 
   The Stan Development Team
   \emph{CmdStan Interface User's Guide}.
-  \url{http://mc-stan.org}.
+  \url{https://mc-stan.org}.
 }
 \seealso{
   \itemize{
   \item The package vignettes for an example of fitting a model and accessing
-  the contents of \code{stanfit} objects (\url{http://mc-stan.org/rstan/articles/}).
+  the contents of \code{stanfit} objects (\url{https://mc-stan.org/rstan/articles/}).
   
   \item \code{\link{stanc}} for translating model code in Stan modeling language to C++, 
   \code{\link{sampling}} for sampling, and \code{\linkS4class{stanfit}} for the

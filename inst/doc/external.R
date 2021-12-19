@@ -31,8 +31,8 @@ stan_model(model_code = mc, model_name = "external", allow_undefined = TRUE,
            includes = paste0('\n#include "', 
                              file.path(getwd(), 'sinc.hpp'), '"\n'))
 
-## ---- echo = FALSE, comment=""------------------------------------------------
-#  cat(readLines("sinc.hpp"), sep = "\n")
+## ---- echo = FALSE, eval = TRUE, comment=""-----------------------------------
+cat(readLines("sinc.hpp"), sep = "\n")
 
 ## ---- eval = TRUE-------------------------------------------------------------
 try(readLines(stanc(model_code = mc, allow_undefined = TRUE)$cppcode))

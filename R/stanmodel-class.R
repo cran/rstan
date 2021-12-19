@@ -234,7 +234,7 @@ setMethod("vb", "stanmodel",
 
             vbres <- sampler$call_sampler(c(args, dotlist))
             samples <- read_one_stan_csv(attr(vbres, "args")$sample_file)
-            diagnostic_columns <- which(grepl('__',colnames(samples)))[-1]
+            diagnostic_columns <- which(grepl('__$',colnames(samples)))[-1]
             if (length(diagnostic_columns)>0) {
               diagnostics <- samples[-1,diagnostic_columns]
               samples <- samples[,-diagnostic_columns]
@@ -798,14 +798,14 @@ setMethod("sampling", "stanmodel",
                   if (.Platform$OS.type == "windows") {
                     print(mat)
                     print("When a numerical problem occurs, the Hamiltonian proposal gets rejected.")
-                    print("See http://mc-stan.org/misc/warnings.html#exception-hamiltonian-proposal-rejected")
+                    print("See https://mc-stan.org/misc/warnings.html#exception-hamiltonian-proposal-rejected")
                     print(paste("If the number in the 'count' column is small, ",
                                 "there is no need to ask about this message on stan-users."))
                   }
                   else {
                     message(paste(capture.output(print(mat)), collapse = "\n"))
                     message("When a numerical problem occurs, the Hamiltonian proposal gets rejected.")
-                    message("See http://mc-stan.org/misc/warnings.html#exception-hamiltonian-proposal-rejected")
+                    message("See https://mc-stan.org/misc/warnings.html#exception-hamiltonian-proposal-rejected")
                     message("If the number in the 'count' column is small, ",
                             "there is no need to ask about this message on stan-users.")
                   }

@@ -2,8 +2,8 @@ Package: rstan
 Encoding: UTF-8
 Type: Package
 Title: R Interface to Stan
-Version: 2.21.2
-Date: 2020-07-27
+Version: 2.21.3
+Date: 2021-12-18
 Authors@R: c(person("Jiqiang", "Guo", email = "guojq28@gmail.com", role = "aut"),
              person("Jonah", "Gabry", email = "jsg2201@columbia.edu", role = "aut"),
              person("Ben", "Goodrich", email = "benjamin.goodrich@columbia.edu", role = c("cre", "aut")),
@@ -32,20 +32,20 @@ Description: User-facing R functions are provided to parse, compile, test,
 License: GPL (>= 3)
 NeedsCompilation: yes
 Imports: methods, stats4, inline, gridExtra (>= 2.0.0), Rcpp (>=
-        0.12.0), RcppParallel (>= 5.0.1), loo (>= 2.3.0), pkgbuild,
-        withr, V8
+        0.12.0), RcppParallel (>= 5.0.1), loo (>= 2.3.0), pkgbuild
 Depends: R (>= 3.4.0), StanHeaders (>= 2.21.0), ggplot2 (>= 3.0.0)
 LinkingTo: Rcpp (>= 0.12.0), RcppEigen (>= 0.3.3.3.0), BH (>=
         1.72.0-2), StanHeaders (>= 2.21.0), RcppParallel
 Suggests: RUnit, RcppEigen (>= 0.3.3.3.0), BH (>= 1.72.0-2), parallel,
         KernSmooth, shinystan (>= 2.3.0), bayesplot (>= 1.5.0),
-        rmarkdown, rstantools, rstudioapi, Matrix, knitr (>= 1.15.1)
-URL: https://mc-stan.org/rstan, https://discourse.mc-stan.org
+        rmarkdown, rstantools, rstudioapi, Matrix, knitr (>= 1.15.1),
+        V8
+URL: https://mc-stan.org/rstan/, https://discourse.mc-stan.org
 BugReports: https://github.com/stan-dev/rstan/issues/
 VignetteBuilder: knitr
 SystemRequirements: GNU make, pandoc
 RoxygenNote: 5.0.1
-Packaged: 2020-07-27 04:00:55 UTC; ben
+Packaged: 2021-12-19 03:34:03 UTC; ben
 Author: Jiqiang Guo [aut],
   Jonah Gabry [aut],
   Ben Goodrich [cre, aut],
@@ -64,4 +64,4 @@ Author: Jiqiang Guo [aut],
   Bronder Steve [ctb]
 Maintainer: Ben Goodrich <benjamin.goodrich@columbia.edu>
 Repository: CRAN
-Date/Publication: 2020-07-27 09:50:02 UTC
+Date/Publication: 2021-12-19 23:30:10 UTC
