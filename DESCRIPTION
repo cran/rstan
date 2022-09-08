@@ -2,8 +2,8 @@ Package: rstan
 Encoding: UTF-8
 Type: Package
 Title: R Interface to Stan
-Version: 2.21.5
-Date: 2022-04-08
+Version: 2.21.7
+Date: 2022-09-07
 Authors@R: c(person("Jiqiang", "Guo", email = "guojq28@gmail.com", role = "aut"),
              person("Jonah", "Gabry", email = "jsg2201@columbia.edu", role = "aut"),
              person("Ben", "Goodrich", email = "benjamin.goodrich@columbia.edu", role = c("cre", "aut")),
@@ -45,7 +45,7 @@ BugReports: https://github.com/stan-dev/rstan/issues/
 VignetteBuilder: knitr
 SystemRequirements: GNU make, pandoc
 RoxygenNote: 5.0.1
-Packaged: 2022-04-09 00:34:45 UTC; ben
+Packaged: 2022-09-07 19:37:15 UTC; ben
 Author: Jiqiang Guo [aut],
   Jonah Gabry [aut],
   Ben Goodrich [cre, aut],
@@ -64,4 +64,4 @@ Author: Jiqiang Guo [aut],
   Bronder Steve [ctb]
 Maintainer: Ben Goodrich <benjamin.goodrich@columbia.edu>
 Repository: CRAN
-Date/Publication: 2022-04-11 14:20:02 UTC
+Date/Publication: 2022-09-08 11:00:13 UTC
