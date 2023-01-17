@@ -10,7 +10,7 @@ SHLIB_LD = $(SHLIB_CXXLD)
 SOURCES_STATIC = stan_fit.cpp stan_fit_base.cpp
 OBJECTS_STATIC = $(SOURCES_STATIC:.cpp=.o)
 
-SOURCES = $(filter-out stan_fit.cpp, $(wildcard *.cpp) stan/lang/ast_def.cpp $(wildcard stan/lang/grammars/*.cpp))
+SOURCES = $(filter-out stan_fit.cpp, $(wildcard *.cpp) stan/lang/ast_def.cpp)
 OBJECTS = $(SOURCES:.cpp=.o)
 
 all: $(SHLIB) $(OBJECTS_STATIC)
