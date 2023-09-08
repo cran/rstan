@@ -12,7 +12,7 @@
 
 <meta name="author" content="Stan Development Team" />
 
-<meta name="date" content="2023-01-16" />
+<meta name="date" content="2023-09-07" />
 
 <title>Interfacing with External C++ Code</title>
 
@@ -326,7 +326,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Interfacing with External C++ Code</h1>
 <h4 class="author">Stan Development Team</h4>
-<h4 class="date">2023-01-16</h4>
+<h4 class="date">2023-09-07</h4>
 
 
 
@@ -355,49 +355,33 @@ model {} // use the complicated() function somehow</code></pre>
 <a class="sourceLine" id="cb3-4" title="4"><span class="st">model {} // use the fib() function somehow</span></a>
 <a class="sourceLine" id="cb3-5" title="5"><span class="st">'</span></a>
 <a class="sourceLine" id="cb3-6" title="6"><span class="kw">try</span>(<span class="kw">stan_model</span>(<span class="dt">model_code =</span> mc, <span class="dt">model_name =</span> <span class="st">&quot;parser_error&quot;</span>), <span class="dt">silent =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
-<pre><code>## SYNTAX ERROR, MESSAGE(S) FROM PARSER:</code></pre>
-<pre><code>## Function declared, but not defined. Function name=fib</code></pre>
-<pre><code>##  error in 'model3df274a84af_parser_error' at line 2, column 29</code></pre>
-<pre><code>##   -------------------------------------------------</code></pre>
-<pre><code>##      1:</code></pre>
-<pre><code>##      2: functions { int fib(int n); }</code></pre>
-<pre><code>##                                     ^</code></pre>
-<pre><code>##      3: model {} // use the fib() function somehow</code></pre>
-<pre><code>##   -------------------------------------------------</code></pre>
-<pre><code>## </code></pre>
 <p>However, if we specify the <code>allow_undefined</code> and <code>includes</code> arguments to the <code>stan_model</code> function, and define a <code>fib</code> function in the named C++ header file, then it will parse and compile</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1"><span class="kw">stan_model</span>(<span class="dt">model_code =</span> mc, <span class="dt">model_name =</span> <span class="st">&quot;external&quot;</span>, <span class="dt">allow_undefined =</span> <span class="ot">TRUE</span>,</a>
-<a class="sourceLine" id="cb14-2" title="2">           <span class="dt">includes =</span> <span class="kw">paste0</span>(<span class="st">'</span><span class="ch">\n</span><span class="st">#include &quot;'</span>, </a>
-<a class="sourceLine" id="cb14-3" title="3">                             <span class="kw">file.path</span>(<span class="kw">getwd</span>(), <span class="st">'fib.hpp'</span>), <span class="st">'&quot;</span><span class="ch">\n</span><span class="st">'</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="kw">stan_model</span>(<span class="dt">model_code =</span> mc, <span class="dt">model_name =</span> <span class="st">&quot;external&quot;</span>, <span class="dt">allow_undefined =</span> <span class="ot">TRUE</span>,</a>
+<a class="sourceLine" id="cb4-2" title="2">           <span class="dt">includes =</span> <span class="kw">paste0</span>(<span class="st">'</span><span class="ch">\n</span><span class="st">#include &quot;'</span>, </a>
+<a class="sourceLine" id="cb4-3" title="3">                             <span class="kw">file.path</span>(<span class="kw">getwd</span>(), <span class="st">'fib.hpp'</span>), <span class="st">'&quot;</span><span class="ch">\n</span><span class="st">'</span>))</a></code></pre></div>
 <p>Specifying the <code>includes</code> argument is a bit awkward because the C++ representation of a Stan program is written and compiled in a temporary directory. Thus, the <code>includes</code> argument must specify a <em>full</em> path to the fib.hpp file, which in this case is in the working directory. Also, the path must be enclosed in double-quotes, which is why single quotes are used in the separate arguments to the <code>paste0</code> function so that double-quotes are interpreted literally. Finally, the <code>includes</code> argument should include newline characters (<code>&quot;\n&quot;</code>) at the start and end. It is possible to specify multiple paths using additional newline characters or include a “meta-header” file that contains <code>#include</code> directives to other C++ header files.</p>
 <p>The result of the <code>includes</code> argument is inserted into the C++ file directly at the end of the lines (as opposed to CmdStan where it is inserted directly <em>before</em> the following lines)</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb15-1" title="1"><span class="pp">#include </span><span class="im">&lt;stan/model/model_header.hpp&gt;</span></a>
-<a class="sourceLine" id="cb15-2" title="2"></a>
-<a class="sourceLine" id="cb15-3" title="3"><span class="kw">namespace</span> some_namespace {</a>
-<a class="sourceLine" id="cb15-4" title="4"></a>
-<a class="sourceLine" id="cb15-5" title="5"><span class="kw">using</span> <span class="bu">std::</span>istream;</a>
-<a class="sourceLine" id="cb15-6" title="6"><span class="kw">using</span> <span class="bu">std::</span>string;</a>
-<a class="sourceLine" id="cb15-7" title="7"><span class="kw">using</span> <span class="bu">std::</span>stringstream;</a>
-<a class="sourceLine" id="cb15-8" title="8"><span class="kw">using</span> <span class="bu">std::</span>vector;</a>
-<a class="sourceLine" id="cb15-9" title="9"><span class="kw">using</span> stan::io::dump;</a>
-<a class="sourceLine" id="cb15-10" title="10"><span class="kw">using</span> stan::math::lgamma;</a>
-<a class="sourceLine" id="cb15-11" title="11"><span class="kw">using</span> stan::model::prob_grad;</a>
-<a class="sourceLine" id="cb15-12" title="12"><span class="kw">using</span> <span class="kw">namespace</span> stan::math;</a>
-<a class="sourceLine" id="cb15-13" title="13"></a>
-<a class="sourceLine" id="cb15-14" title="14"><span class="kw">typedef</span> Eigen::Matrix&lt;<span class="dt">double</span>,Eigen::Dynamic,<span class="dv">1</span>&gt; vector_d;</a>
-<a class="sourceLine" id="cb15-15" title="15"><span class="kw">typedef</span> Eigen::Matrix&lt;<span class="dt">double</span>,<span class="dv">1</span>,Eigen::Dynamic&gt; row_vector_d;</a>
-<a class="sourceLine" id="cb15-16" title="16"><span class="kw">typedef</span> Eigen::Matrix&lt;<span class="dt">double</span>,Eigen::Dynamic,Eigen::Dynamic&gt; matrix_d;</a>
-<a class="sourceLine" id="cb15-17" title="17"></a>
-<a class="sourceLine" id="cb15-18" title="18"><span class="at">static</span> <span class="dt">int</span> current_statement_begin__;</a>
-<a class="sourceLine" id="cb15-19" title="19"></a>
-<a class="sourceLine" id="cb15-20" title="20">stan::io::program_reader prog_reader__() {</a>
-<a class="sourceLine" id="cb15-21" title="21">    stan::io::program_reader reader;</a>
-<a class="sourceLine" id="cb15-22" title="22">    reader.add_event(<span class="dv">0</span>, <span class="dv">0</span>, <span class="st">&quot;start&quot;</span>, <span class="st">&quot;model181f4ea8e0c2_mc&quot;</span>);</a>
-<a class="sourceLine" id="cb15-23" title="23">    reader.add_event(<span class="dv">3</span>, <span class="dv">3</span>, <span class="st">&quot;end&quot;</span>, <span class="st">&quot;model181f4ea8e0c2_mc&quot;</span>);</a>
-<a class="sourceLine" id="cb15-24" title="24">    <span class="cf">return</span> reader;</a>
-<a class="sourceLine" id="cb15-25" title="25">}</a>
-<a class="sourceLine" id="cb15-26" title="26"><span class="co">// various function declarations and / or definitions</span></a>
-<a class="sourceLine" id="cb15-27" title="27"><span class="pp">#include </span><span class="im">&quot;/full/path/to/fib.hpp&quot;</span></a></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb5-1" title="1"><span class="pp">#include </span><span class="im">&lt;stan/model/model_header.hpp&gt;</span></a>
+<a class="sourceLine" id="cb5-2" title="2"></a>
+<a class="sourceLine" id="cb5-3" title="3"><span class="kw">namespace</span> some_namespace {</a>
+<a class="sourceLine" id="cb5-4" title="4"></a>
+<a class="sourceLine" id="cb5-5" title="5"><span class="kw">using</span> <span class="bu">std::</span>istream;</a>
+<a class="sourceLine" id="cb5-6" title="6"><span class="kw">using</span> <span class="bu">std::</span>string;</a>
+<a class="sourceLine" id="cb5-7" title="7"><span class="kw">using</span> <span class="bu">std::</span>stringstream;</a>
+<a class="sourceLine" id="cb5-8" title="8"><span class="kw">using</span> <span class="bu">std::</span>vector;</a>
+<a class="sourceLine" id="cb5-9" title="9"><span class="kw">using</span> stan::io::dump;</a>
+<a class="sourceLine" id="cb5-10" title="10"><span class="kw">using</span> stan::math::lgamma;</a>
+<a class="sourceLine" id="cb5-11" title="11"><span class="kw">using</span> stan::model::prob_grad;</a>
+<a class="sourceLine" id="cb5-12" title="12"><span class="kw">using</span> <span class="kw">namespace</span> stan::math;</a>
+<a class="sourceLine" id="cb5-13" title="13"></a>
+<a class="sourceLine" id="cb5-14" title="14"><span class="kw">typedef</span> Eigen::Matrix&lt;<span class="dt">double</span>,Eigen::Dynamic,<span class="dv">1</span>&gt; vector_d;</a>
+<a class="sourceLine" id="cb5-15" title="15"><span class="kw">typedef</span> Eigen::Matrix&lt;<span class="dt">double</span>,<span class="dv">1</span>,Eigen::Dynamic&gt; row_vector_d;</a>
+<a class="sourceLine" id="cb5-16" title="16"><span class="kw">typedef</span> Eigen::Matrix&lt;<span class="dt">double</span>,Eigen::Dynamic,Eigen::Dynamic&gt; matrix_d;</a>
+<a class="sourceLine" id="cb5-17" title="17"></a>
+<a class="sourceLine" id="cb5-18" title="18"><span class="at">static</span> <span class="dt">int</span> current_statement_begin__;</a>
+<a class="sourceLine" id="cb5-19" title="19"></a>
+<a class="sourceLine" id="cb5-20" title="20"><span class="co">// various function declarations and / or definitions</span></a>
+<a class="sourceLine" id="cb5-21" title="21"><span class="pp">#include </span><span class="im">&quot;/full/path/to/fib.hpp&quot;</span></a></code></pre></div>
 <p>Thus, the definition of the <code>fib</code> function in the fib.hpp file need not be enclosed in any particular namespace (which is a random string by default. The “meta-include” stan/model/model_header.hpp file reads as</p>
 <pre><code>#ifndef STAN_MODEL_MODEL_HEADER_HPP
 #define STAN_MODEL_MODEL_HEADER_HPP
@@ -416,7 +400,6 @@ model {} // use the complicated() function somehow</code></pre>
 #include &lt;stan/model/indexing.hpp&gt;
 #include &lt;stan/services/util/create_rng.hpp&gt;
 
-#include &lt;boost/exception/all.hpp&gt;
 #include &lt;boost/random/additive_combine.hpp&gt;
 #include &lt;boost/random/linear_congruential.hpp&gt;
 
@@ -432,14 +415,14 @@ model {} // use the complicated() function somehow</code></pre>
 #endif</code></pre>
 <p>so the definition of the <code>fib</code> function in the fib.hpp file could utilize any function in the Stan Math Library (without having to prefix function calls with <code>stan::math::</code>), some typedefs to classes in the Eigen matrix algebra library, plus streams, exceptions, etc. without having to worry about the corresponding header files. Nevertheless, an external C++ file <em>may</em> contain additional include directives that bring in class definitions, for example.</p>
 <p>Now let’s examine the fib.hpp file, which contains the C++ lines</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb17-1" title="1"><span class="dt">int</span> fib(<span class="at">const</span> <span class="dt">int</span>&amp;n, <span class="bu">std::</span>ostream* pstream__) {</a>
-<a class="sourceLine" id="cb17-2" title="2">  <span class="cf">if</span> (n &lt;= <span class="dv">0</span>) {</a>
-<a class="sourceLine" id="cb17-3" title="3">    stringstream errmsg;</a>
-<a class="sourceLine" id="cb17-4" title="4">    errmsg &lt;&lt; <span class="st">&quot;n must be positive&quot;</span>;</a>
-<a class="sourceLine" id="cb17-5" title="5">    <span class="cf">throw</span> <span class="bu">std::</span>domain_error(errmsg.str());</a>
-<a class="sourceLine" id="cb17-6" title="6">  }</a>
-<a class="sourceLine" id="cb17-7" title="7">  <span class="cf">return</span> n &lt;= <span class="dv">1</span> ? <span class="dv">1</span> : fib(n - <span class="dv">1</span>, <span class="dv">0</span>) + fib(n - <span class="dv">2</span>, <span class="dv">0</span>);</a>
-<a class="sourceLine" id="cb17-8" title="8">}</a></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb7-1" title="1"><span class="dt">int</span> fib(<span class="at">const</span> <span class="dt">int</span>&amp;n, <span class="bu">std::</span>ostream* pstream__) {</a>
+<a class="sourceLine" id="cb7-2" title="2">  <span class="cf">if</span> (n &lt;= <span class="dv">0</span>) {</a>
+<a class="sourceLine" id="cb7-3" title="3">    stringstream errmsg;</a>
+<a class="sourceLine" id="cb7-4" title="4">    errmsg &lt;&lt; <span class="st">&quot;n must be positive&quot;</span>;</a>
+<a class="sourceLine" id="cb7-5" title="5">    <span class="cf">throw</span> <span class="bu">std::</span>domain_error(errmsg.str());</a>
+<a class="sourceLine" id="cb7-6" title="6">  }</a>
+<a class="sourceLine" id="cb7-7" title="7">  <span class="cf">return</span> n &lt;= <span class="dv">1</span> ? <span class="dv">1</span> : fib(n - <span class="dv">1</span>, <span class="dv">0</span>) + fib(n - <span class="dv">2</span>, <span class="dv">0</span>);</a>
+<a class="sourceLine" id="cb7-8" title="8">}</a></code></pre></div>
 <p>This C++ function is essentially what the preceding user-defined function in the Stan language</p>
 <pre class="stan"><code>int fib(int n) {
   if (n &lt;= 0) reject(&quot;n must be positive&quot;);
@@ -450,14 +433,16 @@ model {} // use the complicated() function somehow</code></pre>
 <p>The only confusing part of the C++ version of the <code>fib</code> function is that it has an additional argument (with no default value) named <code>pstream__</code> that is added to the <em>declaration</em> of the <code>fib</code> function by Stan. Thus, your <em>definition</em> of the <code>fib</code> function needs to match with this signature. This additional argument is a pointer to a <code>std::ostream</code> and is only used if your function prints something to the screen, which is rare. Thus, when we call the <code>fib</code> function recursively in the last line, we specify <code>fib(n - 1, 0) + fib(n - 2, 0);</code> so that the output (if any, and in this case there is none) is directed to the null pointer.</p>
 <p>This vignette has employed a toy example with the Fibonacci function, which has little apparent use in a Stan program and if it were useful, would more easily be implemented as a user-defined function in the <code>functions</code> block as illustrated at the outset. The ability to use external C++ code only becomes useful with more complicated C++ functions. It goes without saying that this mechanism ordinarily cannot call functions in C, Fortran, R, or other languages because Stan needs the derivatives with respect to unknown parameters in order to perform estimation. These derivatives are handled with custom C++ types that cannot be processed by functions in other languages that only handle primitive types such as <code>double</code>, <code>float</code>, etc.</p>
 <p>That said, it is possible to accomplish a great deal in C++, particularly when utilizing the Stan Math Library. For more details, see <a href="https://arxiv.org/abs/1509.07164">The Stan Math Library: Reverse-Mode Automatic Differentiation in C++</a> and its GitHub <a href="https://github.com/stan-dev/math/">repository</a>. The functions that you <em>declare</em> in the <code>functions</code> block of a Stan program will typically involve templating and type promotion in their signatures when parsed to C++ (the only exceptions are functions whose only arguments are integers, as in the <code>fib</code> function above). Suppose you wanted to define a function whose arguments are real numbers (or at least one of the arguments is). For example,</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" title="1">mc &lt;-<span class="st"> </span></a>
-<a class="sourceLine" id="cb19-2" title="2"><span class="st">'</span></a>
-<a class="sourceLine" id="cb19-3" title="3"><span class="st">functions { real sinc(real x); }</span></a>
-<a class="sourceLine" id="cb19-4" title="4"><span class="st">transformed data { real sinc_pi = sinc(pi()); }</span></a>
-<a class="sourceLine" id="cb19-5" title="5"><span class="st">'</span></a>
-<a class="sourceLine" id="cb19-6" title="6"><span class="kw">stan_model</span>(<span class="dt">model_code =</span> mc, <span class="dt">model_name =</span> <span class="st">&quot;external&quot;</span>, <span class="dt">allow_undefined =</span> <span class="ot">TRUE</span>,</a>
-<a class="sourceLine" id="cb19-7" title="7">           <span class="dt">includes =</span> <span class="kw">paste0</span>(<span class="st">'</span><span class="ch">\n</span><span class="st">#include &quot;'</span>, </a>
-<a class="sourceLine" id="cb19-8" title="8">                             <span class="kw">file.path</span>(<span class="kw">getwd</span>(), <span class="st">'sinc.hpp'</span>), <span class="st">'&quot;</span><span class="ch">\n</span><span class="st">'</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">mc &lt;-<span class="st"> </span></a>
+<a class="sourceLine" id="cb9-2" title="2"><span class="st">'</span></a>
+<a class="sourceLine" id="cb9-3" title="3"><span class="st">functions { real sinc(real x); }</span></a>
+<a class="sourceLine" id="cb9-4" title="4"><span class="st">transformed data { real sinc_pi = sinc(pi()); }</span></a>
+<a class="sourceLine" id="cb9-5" title="5"><span class="st">'</span></a>
+<a class="sourceLine" id="cb9-6" title="6"><span class="kw">stan_model</span>(<span class="dt">model_code =</span> mc, <span class="dt">model_name =</span> <span class="st">&quot;external&quot;</span>, <span class="dt">allow_undefined =</span> <span class="ot">TRUE</span>,</a>
+<a class="sourceLine" id="cb9-7" title="7">           <span class="dt">includes =</span> <span class="kw">paste0</span>(<span class="st">'</span><span class="ch">\n</span><span class="st">#include &quot;'</span>, </a>
+<a class="sourceLine" id="cb9-8" title="8">                             <span class="kw">file.path</span>(<span class="kw">getwd</span>(), <span class="st">'sinc.hpp'</span>), <span class="st">'&quot;</span><span class="ch">\n</span><span class="st">'</span>))</a></code></pre></div>
+<pre><code>## Error in compileCode(f, code, language = language, verbose = verbose):  inline sugar::Var&lt;INTSXP,NA,T&gt; var( const VectorBase&lt;INTSXP,NA,T&gt;&amp; t){                                ^~~/home/ben/r-devel/library/Rcpp/include/Rcpp/sugar/functions/var.h:74:33: note:                 ‘template&lt;bool NA, class T&gt; Rcpp::sugar::Var&lt;14, NA, T&gt; Rcpp::var(const Rcpp::VectorBase&lt;14, NA_, T&gt;&amp;)’ inline sugar::Var&lt;REALSXP,NA,T&gt; var( const VectorBase&lt;REALSXP,NA,T&gt;&amp; t){                                 ^~~make: *** [/home/ben/r-devel/etc/Makeconf:200: filea4e588f3718.o] Error 1</code></pre>
+<pre><code>## Error in sink(type = &quot;output&quot;): invalid connection</code></pre>
 <p>The sinc.hpp file reads as</p>
 <pre><code>double
 sinc(const double&amp; x, std::ostream* pstream__) {
@@ -474,119 +459,83 @@ sinc(const var&amp; x, std::ostream* pstream__) {
 <p>The body of the first <code>sinc</code> function is simply its mathematical definition in the form of a ternary operator, which is sufficient when the input is a <code>double</code>.</p>
 <p>The last lines of sinc.hpp are a specialization for when the input is an unknown real parameter, which is represented in the Stan Math Library as a <code>stan::math::var</code>. Since the derivative of the <code>sinc</code> function is easy to compute analytically, we extract the underlying double-precision value from the inputted <code>stan::math::var</code> and use that to calculate the function value and its first derivative. Then, we return the result of <code>precomputed_gradients</code>, whose arguments are the function value (<code>f</code>), the derivative of <code>x</code> with respect to any other parameters (<code>x.vi_</code>), and the first derivative of <code>f</code> (<code>dfdx_</code>). The latter two are actually <code>std::vector</code>s but only have one element each because there is only one unknown.</p>
 <p>An easy way to see what the generated function signature will be is to call the <code>stanc</code> function in the <strong>rstan</strong> package with <code>allow_undefined = TRUE</code> and inspect the resuling C++ code. In this case, I first did</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" title="1"><span class="kw">try</span>(<span class="kw">readLines</span>(<span class="kw">stanc</span>(<span class="dt">model_code =</span> mc, <span class="dt">allow_undefined =</span> <span class="ot">TRUE</span>)<span class="op">$</span>cppcode))</a></code></pre></div>
-<pre><code>## Warning in file(con, &quot;r&quot;): expanded path length 9272 would be too long for
-## // Code generated by Stan version 2.21.0
-## 
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="kw">try</span>(<span class="kw">readLines</span>(<span class="kw">stanc</span>(<span class="dt">model_code =</span> mc, <span class="dt">allow_undefined =</span> <span class="ot">TRUE</span>)<span class="op">$</span>cppcode))</a></code></pre></div>
+<pre><code>## Warning in file(con, &quot;r&quot;): expanded path length 13223 would be too long for
+## #ifndef USE_STANC3
+## #define USE_STANC3
+## #endif
+## // Code generated by stanc v2.26.1-4-gd72b68b7-dirty
 ## #include &lt;stan/model/model_header.hpp&gt;
-## 
-## namespace model3df210d0ce01_mc_namespace {
-## 
-## using std::istream;
-## using std::string;
-## using std::stringstream;
-## using std::vector;
-## using stan::io::dump;
-## using stan::math::lgamma;
-## using stan::model::prob_grad;
-## using namespace stan::math;
-## 
-## static int current_statement_begin__;
-## 
-## stan::io::program_reader prog_reader__() {
-##     stan::io::program_reader reader;
-##     reader.add_event(0, 0, &quot;start&quot;, &quot;model3df210d0ce01_mc&quot;);
-##     reader.add_event(5, 3, &quot;end&quot;, &quot;model3df210d0ce01_mc&quot;);
-##     return reader;
+## namespace modela4e3ae00ef3_filea4e60212a13_namespace {
+## inline void validate_positive_index(const char* var_name, const char* expr,
+##                                     int val) {
+##   if (val &lt; 1) {
+##     std::stringstream msg;
+##     msg &lt;&lt; &quot;Found dimension size less than one in simplex declaration&quot;
+##         &lt;&lt; &quot;; variable=&quot; &lt;&lt; var_name &lt;&lt; &quot;; dimension size expression=&quot; &lt;&lt; expr
+##         &lt;&lt; &quot;; expression value=&quot; &lt;&lt; val;
+##     std::string msg_str(msg.str());
+##     throw std::invalid_argument(msg_str.c_str());
+##   }
 ## }
-## 
-## template &lt;typename T0__&gt;
-## typename boost::math::tools::promote_args&lt;T0__&gt;::type
-## sinc(const T0__&amp; x, std::ostream* pstream__);
-## 
-## class model3df210d0ce01_mc
-##   : public stan::model::model_base_crtp&lt;model3df210d0ce01_mc&gt; {
-## private:
-##         double sinc_pi;
-## public:
-##     model3df210d0ce01_mc(stan::io::var_context&amp; context__,
-##         std::ostream* pstream__ = 0)
-##         : model_base_ [... truncated]
+## inline void validate_unit_vector_index(const char* var_name, const char* expr,
+##                                        int val) {
+##   if (val &lt;= 1) {
+##     std::stringstream msg;
+##     if (val == 1) {
+##       msg &lt;&lt; &quot;Found dimension size one in unit vector declaration.&quot;
+##           &lt;&lt; &quot; One-dimensional unit vector is d [... truncated]
 
-## Warning in file(con, &quot;r&quot;): expanded path length 9272 would be too long for
-## // Code generated by Stan version 2.21.0
-## 
+## Warning in file(con, &quot;r&quot;): expanded path length 13223 would be too long for
+## #ifndef USE_STANC3
+## #define USE_STANC3
+## #endif
+## // Code generated by stanc v2.26.1-4-gd72b68b7-dirty
 ## #include &lt;stan/model/model_header.hpp&gt;
-## 
-## namespace model3df210d0ce01_mc_namespace {
-## 
-## using std::istream;
-## using std::string;
-## using std::stringstream;
-## using std::vector;
-## using stan::io::dump;
-## using stan::math::lgamma;
-## using stan::model::prob_grad;
-## using namespace stan::math;
-## 
-## static int current_statement_begin__;
-## 
-## stan::io::program_reader prog_reader__() {
-##     stan::io::program_reader reader;
-##     reader.add_event(0, 0, &quot;start&quot;, &quot;model3df210d0ce01_mc&quot;);
-##     reader.add_event(5, 3, &quot;end&quot;, &quot;model3df210d0ce01_mc&quot;);
-##     return reader;
+## namespace modela4e3ae00ef3_filea4e60212a13_namespace {
+## inline void validate_positive_index(const char* var_name, const char* expr,
+##                                     int val) {
+##   if (val &lt; 1) {
+##     std::stringstream msg;
+##     msg &lt;&lt; &quot;Found dimension size less than one in simplex declaration&quot;
+##         &lt;&lt; &quot;; variable=&quot; &lt;&lt; var_name &lt;&lt; &quot;; dimension size expression=&quot; &lt;&lt; expr
+##         &lt;&lt; &quot;; expression value=&quot; &lt;&lt; val;
+##     std::string msg_str(msg.str());
+##     throw std::invalid_argument(msg_str.c_str());
+##   }
 ## }
-## 
-## template &lt;typename T0__&gt;
-## typename boost::math::tools::promote_args&lt;T0__&gt;::type
-## sinc(const T0__&amp; x, std::ostream* pstream__);
-## 
-## class model3df210d0ce01_mc
-##   : public stan::model::model_base_crtp&lt;model3df210d0ce01_mc&gt; {
-## private:
-##         double sinc_pi;
-## public:
-##     model3df210d0ce01_mc(stan::io::var_context&amp; context__,
-##         std::ostream* pstream__ = 0)
-##         : model_base_ [... truncated]</code></pre>
-<pre><code>## Warning in file(con, &quot;r&quot;): cannot open file '// Code generated by Stan version 2.21.0
-## 
+## inline void validate_unit_vector_index(const char* var_name, const char* expr,
+##                                        int val) {
+##   if (val &lt;= 1) {
+##     std::stringstream msg;
+##     if (val == 1) {
+##       msg &lt;&lt; &quot;Found dimension size one in unit vector declaration.&quot;
+##           &lt;&lt; &quot; One-dimensional unit vector is d [... truncated]</code></pre>
+<pre><code>## Warning in file(con, &quot;r&quot;): cannot open file '#ifndef USE_STANC3
+## #define USE_STANC3
+## #endif
+## // Code generated by stanc v2.26.1-4-gd72b68b7-dirty
 ## #include &lt;stan/model/model_header.hpp&gt;
-## 
-## namespace model3df210d0ce01_mc_namespace {
-## 
-## using std::istream;
-## using std::string;
-## using std::stringstream;
-## using std::vector;
-## using stan::io::dump;
-## using stan::math::lgamma;
-## using stan::model::prob_grad;
-## using namespace stan::math;
-## 
-## static int current_statement_begin__;
-## 
-## stan::io::program_reader prog_reader__() {
-##     stan::io::program_reader reader;
-##     reader.add_event(0, 0, &quot;start&quot;, &quot;model3df210d0ce01_mc&quot;);
-##     reader.add_event(5, 3, &quot;end&quot;, &quot;model3df210d0ce01_mc&quot;);
-##     return reader;
+## namespace modela4e3ae00ef3_filea4e60212a13_namespace {
+## inline void validate_positive_index(const char* var_name, const char* expr,
+##                                     int val) {
+##   if (val &lt; 1) {
+##     std::stringstream msg;
+##     msg &lt;&lt; &quot;Found dimension size less than one in simplex declaration&quot;
+##         &lt;&lt; &quot;; variable=&quot; &lt;&lt; var_name &lt;&lt; &quot;; dimension size expression=&quot; &lt;&lt; expr
+##         &lt;&lt; &quot;; expression value=&quot; &lt;&lt; val;
+##     std::string msg_str(msg.str());
+##     throw std::invalid_argument(msg_str.c_str());
+##   }
 ## }
-## 
-## template &lt;typename T0__&gt;
-## typename boost::math::tools::promote_args&lt;T0__&gt;::type
-## sinc(const T0__&amp; x, std::ostream* pstream__);
-## 
-## class model3df210d0ce01_mc
-##   : public stan::model::model_base_crtp&lt;model3df210d0ce01_mc&gt; {
-## private:
-##         double sinc_pi;
-## public:
-##     model3df210d0ce01_mc(stan::io::var_context&amp; context__,
-##         std::ostream* pstream__ = 0)
-##         : model_base_crtp(0) {
-##         ctor_body(co [... truncated]</code></pre>
+## inline void validate_unit_vector_index(const char* var_name, const char* expr,
+##                                        int val) {
+##   if (val &lt;= 1) {
+##     std::stringstream msg;
+##     if (val == 1) {
+##       msg &lt;&lt; &quot;Found dimension size one in unit vector declaration.&quot;
+##           &lt;&lt; &quot; One-dimensional unit vector is discrete&quot;
+##           &lt;&lt; &quot; but the [... truncated]</code></pre>
 <pre><code>## Error in file(con, &quot;r&quot;) : cannot open the connection</code></pre>
 <p>to see what function signatures needed to be written for sinc.hpp.</p>
 <p>Once you go to the trouble of writing a numerically stable C++ function, we would welcome a pull request on GitHub to include your C++ function in the Stan Math Library for everyone to benefit from, provided that it can be licensed under the 3-clause BSD license and its use is not overly-specific to your particular Stan program.</p>
