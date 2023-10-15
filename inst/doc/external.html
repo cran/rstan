@@ -12,7 +12,7 @@
 
 <meta name="author" content="Stan Development Team" />
 
-<meta name="date" content="2023-09-07" />
+<meta name="date" content="2023-10-14" />
 
 <title>Interfacing with External C++ Code</title>
 
@@ -326,7 +326,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Interfacing with External C++ Code</h1>
 <h4 class="author">Stan Development Team</h4>
-<h4 class="date">2023-09-07</h4>
+<h4 class="date">2023-10-14</h4>
 
 
 
@@ -441,7 +441,7 @@ model {} // use the complicated() function somehow</code></pre>
 <a class="sourceLine" id="cb9-6" title="6"><span class="kw">stan_model</span>(<span class="dt">model_code =</span> mc, <span class="dt">model_name =</span> <span class="st">&quot;external&quot;</span>, <span class="dt">allow_undefined =</span> <span class="ot">TRUE</span>,</a>
 <a class="sourceLine" id="cb9-7" title="7">           <span class="dt">includes =</span> <span class="kw">paste0</span>(<span class="st">'</span><span class="ch">\n</span><span class="st">#include &quot;'</span>, </a>
 <a class="sourceLine" id="cb9-8" title="8">                             <span class="kw">file.path</span>(<span class="kw">getwd</span>(), <span class="st">'sinc.hpp'</span>), <span class="st">'&quot;</span><span class="ch">\n</span><span class="st">'</span>))</a></code></pre></div>
-<pre><code>## Error in compileCode(f, code, language = language, verbose = verbose):  inline sugar::Var&lt;INTSXP,NA,T&gt; var( const VectorBase&lt;INTSXP,NA,T&gt;&amp; t){                                ^~~/home/ben/r-devel/library/Rcpp/include/Rcpp/sugar/functions/var.h:74:33: note:                 ‘template&lt;bool NA, class T&gt; Rcpp::sugar::Var&lt;14, NA, T&gt; Rcpp::var(const Rcpp::VectorBase&lt;14, NA_, T&gt;&amp;)’ inline sugar::Var&lt;REALSXP,NA,T&gt; var( const VectorBase&lt;REALSXP,NA,T&gt;&amp; t){                                 ^~~make: *** [/home/ben/r-devel/etc/Makeconf:200: filea4e588f3718.o] Error 1</code></pre>
+<pre><code>## Error in compileCode(f, code, language = language, verbose = verbose): /home/ben/r-devel/library/RcppEigen/include/Eigen/src/Core/ProductEvaluators.h:35:90:   required from ‘Eigen::internal::evaluator&lt;Eigen::Product&lt;Lhs, Rhs, Option&gt; &gt;::evaluator(const XprType&amp;) [with Lhs = Eigen::Product&lt;Eigen::CwiseBinaryOp&lt;Eigen::internal::scalar_product_op&lt;double, double&gt;, const Eigen::CwiseNullaryOp&lt;Eigen::internal::scalar_constant_op&lt;double&gt;, const Eigen::Matrix&lt;double, 1, -1&gt; &gt;, const Eigen::Transpose&lt;Eigen::Matrix&lt;double, -1, 1&gt; &gt; &gt;, Eigen::Matrix&lt;double, -1, -1&gt;, 0&gt;; Rhs = Eigen::Matrix&lt;double, -1, 1&gt;; int Options = 0; Eigen::internal::evaluator&lt;Eigen::Product&lt;Lhs, Rhs, Option&gt; &gt;::XprType = Eigen::Product&lt;Eigen::Product&lt;Eigen::CwiseBinaryOp&lt;Eigen::internal::scalar_product_op&lt;double, double&gt;, const Eigen::CwiseNullaryOp&lt;Eigen::internal::scalar_constant_op&lt;double&gt;, const Eigen::Matrix&lt;double, 1, -1&gt; &gt;, const Eigen::Transpose&lt;Eigen::Matrix&lt;double, -1, 1&gt; &gt; &gt;, Eigen::Matrix&lt;double, -1, -1&gt;, 0&gt;, Eigen::Matrix&lt;double, -1, 1&gt;, 0&gt;]’/home/ben/r-devel/library/RcppEigen/include/Eigen/src/Core/Product.h:132:22:   required from ‘Eigen::internal::dense_product_base&lt;Lhs, Rhs, Option, 6&gt;::operator const Scalar() const [with Lhs = Eigen::Product&lt;Eigen::CwiseBinaryOp&lt;Eigen::internal::scalar_product_op&lt;double, double&gt;, const Eigen::CwiseNullaryOp&lt;Eigen::internal::scalar_constant_op&lt;double&gt;, const Eigen::Matrix&lt;double, 1, -1&gt; &gt;, const Eigen::Transpose&lt;Eigen::Matrix&lt;double, -1, 1&gt; &gt; &gt;, Eigen::Matrix&lt;double, -1, -1&gt;, 0&gt;; Rhs = Eigen::Matrix&lt;double, -1, 1&gt;; int Option = 0; Eigen::internal::dense_product_base&lt;Lhs, Rhs, Option, 6&gt;::Scalar = double]’/home/ben/r-devel/library/StanHeaders/include/src/stan/mcmc/hmc/hamiltonians/dense_e_metric.hpp:22:56:   required from ‘double stan::mcmc::dense_e_metric&lt;Model, BaseRNG&gt;::T(stan::mcmc::dense_e_point&amp;) [with Model = model532f65a758d_external_namespace::model532f65a758d_external; BaseRNG = boost::random::additive_combine_engine&lt;boost::random::linear_congruential_engine&lt;unsigned int, 40014, 0, 2147483563&gt;, boost::random::linear_congruential_engine&lt;unsigned int, 40692, 0, 2147483399&gt; &gt;]’/home/ben/r-devel/library/StanHeaders/include/src/stan/mcmc/hmc/hamiltonians/dense_e_metric.hpp:21:10:   required from here/home/ben/r-devel/library/RcppEigen/include/Eigen/src/Core/DenseCoeffsBase.h:55:30: warning: ignoring attributes on template argument ‘Eigen::internal::packet_traits&lt;double&gt;::type’ {aka ‘__vector(2) double’} [-Wignored-attributes]make: *** [/home/ben/r-devel/etc/Makeconf:200: file532f6473f42.o] Error 1</code></pre>
 <pre><code>## Error in sink(type = &quot;output&quot;): invalid connection</code></pre>
 <p>The sinc.hpp file reads as</p>
 <pre><code>double
@@ -460,13 +460,13 @@ sinc(const var&amp; x, std::ostream* pstream__) {
 <p>The last lines of sinc.hpp are a specialization for when the input is an unknown real parameter, which is represented in the Stan Math Library as a <code>stan::math::var</code>. Since the derivative of the <code>sinc</code> function is easy to compute analytically, we extract the underlying double-precision value from the inputted <code>stan::math::var</code> and use that to calculate the function value and its first derivative. Then, we return the result of <code>precomputed_gradients</code>, whose arguments are the function value (<code>f</code>), the derivative of <code>x</code> with respect to any other parameters (<code>x.vi_</code>), and the first derivative of <code>f</code> (<code>dfdx_</code>). The latter two are actually <code>std::vector</code>s but only have one element each because there is only one unknown.</p>
 <p>An easy way to see what the generated function signature will be is to call the <code>stanc</code> function in the <strong>rstan</strong> package with <code>allow_undefined = TRUE</code> and inspect the resuling C++ code. In this case, I first did</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="kw">try</span>(<span class="kw">readLines</span>(<span class="kw">stanc</span>(<span class="dt">model_code =</span> mc, <span class="dt">allow_undefined =</span> <span class="ot">TRUE</span>)<span class="op">$</span>cppcode))</a></code></pre></div>
-<pre><code>## Warning in file(con, &quot;r&quot;): expanded path length 13223 would be too long for
+<pre><code>## Warning in file(con, &quot;r&quot;): expanded path length 13254 would be too long for
 ## #ifndef USE_STANC3
 ## #define USE_STANC3
 ## #endif
 ## // Code generated by stanc v2.26.1-4-gd72b68b7-dirty
 ## #include &lt;stan/model/model_header.hpp&gt;
-## namespace modela4e3ae00ef3_filea4e60212a13_namespace {
+## namespace model532f53270374_file532f11796288_namespace {
 ## inline void validate_positive_index(const char* var_name, const char* expr,
 ##                                     int val) {
 ##   if (val &lt; 1) {
@@ -484,15 +484,15 @@ sinc(const var&amp; x, std::ostream* pstream__) {
 ##     std::stringstream msg;
 ##     if (val == 1) {
 ##       msg &lt;&lt; &quot;Found dimension size one in unit vector declaration.&quot;
-##           &lt;&lt; &quot; One-dimensional unit vector is d [... truncated]
+##           &lt;&lt; &quot; One-dimensional unit vector is [... truncated]
 
-## Warning in file(con, &quot;r&quot;): expanded path length 13223 would be too long for
+## Warning in file(con, &quot;r&quot;): expanded path length 13254 would be too long for
 ## #ifndef USE_STANC3
 ## #define USE_STANC3
 ## #endif
 ## // Code generated by stanc v2.26.1-4-gd72b68b7-dirty
 ## #include &lt;stan/model/model_header.hpp&gt;
-## namespace modela4e3ae00ef3_filea4e60212a13_namespace {
+## namespace model532f53270374_file532f11796288_namespace {
 ## inline void validate_positive_index(const char* var_name, const char* expr,
 ##                                     int val) {
 ##   if (val &lt; 1) {
@@ -510,13 +510,13 @@ sinc(const var&amp; x, std::ostream* pstream__) {
 ##     std::stringstream msg;
 ##     if (val == 1) {
 ##       msg &lt;&lt; &quot;Found dimension size one in unit vector declaration.&quot;
-##           &lt;&lt; &quot; One-dimensional unit vector is d [... truncated]</code></pre>
+##           &lt;&lt; &quot; One-dimensional unit vector is [... truncated]</code></pre>
 <pre><code>## Warning in file(con, &quot;r&quot;): cannot open file '#ifndef USE_STANC3
 ## #define USE_STANC3
 ## #endif
 ## // Code generated by stanc v2.26.1-4-gd72b68b7-dirty
 ## #include &lt;stan/model/model_header.hpp&gt;
-## namespace modela4e3ae00ef3_filea4e60212a13_namespace {
+## namespace model532f53270374_file532f11796288_namespace {
 ## inline void validate_positive_index(const char* var_name, const char* expr,
 ##                                     int val) {
 ##   if (val &lt; 1) {
@@ -535,7 +535,7 @@ sinc(const var&amp; x, std::ostream* pstream__) {
 ##     if (val == 1) {
 ##       msg &lt;&lt; &quot;Found dimension size one in unit vector declaration.&quot;
 ##           &lt;&lt; &quot; One-dimensional unit vector is discrete&quot;
-##           &lt;&lt; &quot; but the [... truncated]</code></pre>
+##           &lt;&lt; &quot; but t [... truncated]</code></pre>
 <pre><code>## Error in file(con, &quot;r&quot;) : cannot open the connection</code></pre>
 <p>to see what function signatures needed to be written for sinc.hpp.</p>
 <p>Once you go to the trouble of writing a numerically stable C++ function, we would welcome a pull request on GitHub to include your C++ function in the Stan Math Library for everyone to benefit from, provided that it can be licensed under the 3-clause BSD license and its use is not overly-specific to your particular Stan program.</p>

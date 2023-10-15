@@ -1,18 +1,18 @@
 Package: rstan
 Type: Package
 Title: R Interface to Stan
-Version: 2.26.23
+Version: 2.32.3
 Authors@R: c(person("Jiqiang", "Guo", email = "guojq28@gmail.com", role = "aut"),
              person("Jonah", "Gabry", email = "jsg2201@columbia.edu", role = "aut"),
              person("Ben", "Goodrich", email = "benjamin.goodrich@columbia.edu", role = c("cre", "aut")),
              person("Andrew", "Johnson", email = "andrew.johnson@arjohnsonau.com", role = "aut"),
              person("Sebastian", "Weber", email = "sdw.post@waebers.de", role = "aut"),
+             person("Hamada S.", "Badr", role = c("aut"),
+                    email = "badr@jhu.edu",
+                    comment = c(ORCID = "0000-0002-9808-2344")),
              person("Daniel", "Lee", role = "ctb"),
              person("Krzysztof", "Sakrejda", role = "ctb"),
              person("Modrak", "Martin", role = "ctb"),
-             person("Hamada S.", "Badr", role = c("ctb"),
-                    email = "badr@jhu.edu",
-                    comment = c(ORCID = "0000-0002-9808-2344")),
              person("Trustees of", "Columbia University", role = "cph"),
              person("Oleg", "Sklyar", role = "cph", comment = "R/cxxfunplus.R"),
              person("The R", "Core Team", role = "cph", comment = "R/pairs.R, R/dynGet.R"),
@@ -36,12 +36,12 @@ NeedsCompilation: yes
 Imports: methods, stats4, inline (>= 0.3.19), gridExtra (>= 2.3), Rcpp
         (>= 1.0.7), RcppParallel (>= 5.1.4), loo (>= 2.4.1), pkgbuild
         (>= 1.2.0), QuickJSR, ggplot2 (>= 3.3.5)
-Depends: R (>= 3.4.0), StanHeaders (>= 2.26.22)
-LinkingTo: Rcpp (>= 1.0.7), RcppEigen (>= 0.3.3.9.1), BH (>= 1.75.0-0),
-        StanHeaders (>= 2.26.22), RcppParallel (>= 5.1.4)
+Depends: R (>= 3.4.0), StanHeaders (>= 2.26.28)
+LinkingTo: Rcpp (>= 1.0.7), RcppEigen (>= 0.3.3.9.3), BH (>= 1.75.0-0),
+        StanHeaders (>= 2.26.28), RcppParallel (>= 5.1.4)
 Suggests: testthat (>= 3.0.4), parallel, KernSmooth, shinystan,
         bayesplot, rmarkdown, rstantools, rstudioapi, Matrix, knitr,
-        rstanarm, coda
+        coda, V8
 URL: https://mc-stan.org/rstan/, https://discourse.mc-stan.org
 BugReports: https://github.com/stan-dev/rstan/issues/
 VignetteBuilder: knitr
@@ -49,16 +49,16 @@ SystemRequirements: GNU make, pandoc
 Encoding: UTF-8
 RoxygenNote: 7.1.2
 Config/testthat/edition: 3
-Packaged: 2023-09-07 21:28:20 UTC; ben
+Packaged: 2023-10-15 02:09:37 UTC; ben
 Author: Jiqiang Guo [aut],
   Jonah Gabry [aut],
   Ben Goodrich [cre, aut],
   Andrew Johnson [aut],
   Sebastian Weber [aut],
+  Hamada S. Badr [aut] (<https://orcid.org/0000-0002-9808-2344>),
   Daniel Lee [ctb],
   Krzysztof Sakrejda [ctb],
   Modrak Martin [ctb],
-  Hamada S. Badr [ctb] (<https://orcid.org/0000-0002-9808-2344>),
   Trustees of Columbia University [cph],
   Oleg Sklyar [cph] (R/cxxfunplus.R),
   The R Core Team [cph] (R/pairs.R, R/dynGet.R),
@@ -70,4 +70,4 @@ Author: Jiqiang Guo [aut],
   Bronder Steve [ctb]
 Maintainer: Ben Goodrich <benjamin.goodrich@columbia.edu>
 Repository: CRAN
-Date/Publication: 2023-09-08 10:30:02 UTC
+Date/Publication: 2023-10-15 05:00:02 UTC
