@@ -1,7 +1,7 @@
 Package: rstan
 Type: Package
 Title: R Interface to Stan
-Version: 2.32.3
+Version: 2.32.5
 Authors@R: c(person("Jiqiang", "Guo", email = "guojq28@gmail.com", role = "aut"),
              person("Jonah", "Gabry", email = "jsg2201@columbia.edu", role = "aut"),
              person("Ben", "Goodrich", email = "benjamin.goodrich@columbia.edu", role = c("cre", "aut")),
@@ -36,7 +36,7 @@ NeedsCompilation: yes
 Imports: methods, stats4, inline (>= 0.3.19), gridExtra (>= 2.3), Rcpp
         (>= 1.0.7), RcppParallel (>= 5.1.4), loo (>= 2.4.1), pkgbuild
         (>= 1.2.0), QuickJSR, ggplot2 (>= 3.3.5)
-Depends: R (>= 3.4.0), StanHeaders (>= 2.26.28)
+Depends: R (>= 3.4.0), StanHeaders (>= 2.32.0)
 LinkingTo: Rcpp (>= 1.0.7), RcppEigen (>= 0.3.3.9.3), BH (>= 1.75.0-0),
         StanHeaders (>= 2.26.28), RcppParallel (>= 5.1.4)
 Suggests: testthat (>= 3.0.4), parallel, KernSmooth, shinystan,
@@ -49,7 +49,7 @@ SystemRequirements: GNU make, pandoc
 Encoding: UTF-8
 RoxygenNote: 7.1.2
 Config/testthat/edition: 3
-Packaged: 2023-10-15 02:09:37 UTC; ben
+Packaged: 2024-01-10 17:29:36 UTC; ben
 Author: Jiqiang Guo [aut],
   Jonah Gabry [aut],
   Ben Goodrich [cre, aut],
@@ -70,4 +70,4 @@ Author: Jiqiang Guo [aut],
   Bronder Steve [ctb]
 Maintainer: Ben Goodrich <benjamin.goodrich@columbia.edu>
 Repository: CRAN
-Date/Publication: 2023-10-15 05:00:02 UTC
+Date/Publication: 2024-01-10 20:20:03 UTC
