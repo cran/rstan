@@ -1202,12 +1202,6 @@ stan_plot_inferences <- function(sim, summary, pars, model_info, display_paralle
 
   tidx <- pars_total_indexes(sim$pars_oi, sim$dims_oi, sim$fnames_oi, pars)
 
-  ## if in Splus, suppress printing of warnings during the plotting.
-  ## otherwise a warning is generated
-  if (!is.R()) {
-    warn.settings <- options("warn")[[1]]
-    options (warn = -1)
-  }
   height <- .6
   # mar: c(bottom, left, top, right)
   par.old <- par(no.readonly = TRUE)
@@ -1216,8 +1210,6 @@ stan_plot_inferences <- function(sim, summary, pars, model_info, display_paralle
 
   plot(c(0, 1), c(-n_pars - .5, -.4),
        ann = FALSE, bty = "n", xaxt = "n", yaxt = "n", type = "n")
-  if (!is.R())
-    options(warn = warn.settings)
 
   # plot the model general information
   header <- paste("Stan model '", model_info$model_name, "' (", chains,

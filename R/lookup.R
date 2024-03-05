@@ -30,11 +30,12 @@ lookup <- function(FUN, ReturnType = character()) {
   
   if(FUN == "nrow") FUN <- "NROW"
   if(FUN == "ncol") FUN <- "NCOL"
+  keep_cols <- colnames(rosetta) != "RFunction"
   if(exists(FUN)) {
     matches <- as.logical(charmatch(rosetta$RFunction, FUN, nomatch = 0L))
-    if(any(matches)) return(rosetta[matches,-1,drop=FALSE])
+    if(any(matches)) return(rosetta[matches, keep_cols, drop = FALSE])
   }
   matches <- grepl(FUN, rosetta$StanFunction, ignore.case = TRUE)
-  if(any(matches)) return(rosetta[matches,-1,drop=FALSE])
+  if(any(matches)) return(rosetta[matches, keep_cols, drop = FALSE])
   else return("no matching Stan functions")
 }
