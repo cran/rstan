@@ -1,4 +1,4 @@
-ee0120ee4b5e61b2729b91cd47b4773f *DESCRIPTION
+3d4f6609281be2740cbe108bd9281942 *DESCRIPTION
 bc920dbceb702625ef4356b50b70516c *NAMESPACE
 3cccf2531604250590c050c5eb7fc89b *R/AllClass.R
 0306392b316061e6e0cb3a6d5a5e4af2 *R/Rcpp_module_def.R
@@ -21,7 +21,7 @@ b638a37ca48c23c572005f42aa84d60c *R/loo.R
 21cbc80ec61dcb2b4705e2fc9407e9d4 *R/misc.R
 b1217d40b39d6d485220c025166c065f *R/monitor.R
 cbb69ae5de13afbd9ea1b47c0cf5b584 *R/options.R
-ee56fcd8abdde2febb54912aae96629b *R/pairs.R
+86334e778adc7cf4312e458e2590c876 *R/pairs.R
 eb118f681d77663420c90f10afd978e7 *R/plugin.R
 ea0ea211b3ddec781332f8b5e9747462 *R/rstan.R
 b70941b2e3061f28c62a7a9091d09807 *R/rstan_package_skeleton.R
@@ -30,7 +30,7 @@ b91f9c873636c8e6f8bdbc5352e7b865 *R/stan_demo.R
 092be35061d13811abab376a8426a912 *R/stan_plot.R
 87cee63b9d4307404af5ddc991828c38 *R/stan_plot_helpers.R
 4d04ac11be416788a8110afbcb973a3f *R/stan_plot_options.R
-aa9d905f6c44ad0915d3ef6d0d6b28cb *R/stanc.R
+f5d9b50643558392c9d8345e60f11521 *R/stanc.R
 e45b2ee10dd4af086d5b00aab7de531e *R/stanfit-class.R
 0d7b385eca02ea911e4011b3403dcb77 *R/stanmodel-class.R
 96e759449f5d0b03c0cb7a454e1a61be *R/sysdata.rda
@@ -41,20 +41,20 @@ d270280b05019875cf036edaa2a3761b *build/vignette.rds
 53fd108a3a5c89c4e58b2d50473be053 *inst/NEWS
 17fe90ba1e1cc8f29064273f2eb99d41 *inst/doc/SBC.R
 60807dbb8f42c7fbea42af2106f4b7bb *inst/doc/SBC.Rmd
-0c88653a3746c8c1f56fb5481daec5d4 *inst/doc/SBC.html
+4786d7353a21c50a3deda82cb80afb1f *inst/doc/SBC.html
 a883593fd4071563c42afe7a211989f7 *inst/doc/external.R
 bb3a197b4b3851f26fedd956fede71d9 *inst/doc/external.Rmd
-50fcebe331eb6ef76a62108f1076d03d *inst/doc/external.html
+8581b947f3a3712c16ba670ff000496b *inst/doc/external.html
 0db8fc6153416d2b102ed15caaacd1a5 *inst/doc/fib.hpp
 ebe981f155385ffc09a0ca509a4d43e6 *inst/doc/rstan.R
 a932f60c85796aa76d1abfe05a2b45b3 *inst/doc/rstan.Rmd
 1799199339330f0e7880b56f49d904d5 *inst/doc/rstan.bib
-b47111ae312bb48343b26f1add020a3c *inst/doc/rstan.html
+e6521fbb064bd1cd8e91a4378af957f1 *inst/doc/rstan.html
 1498c8570e0af4716b99f6c1afff45d9 *inst/doc/schools.stan
 3ca8eda8516420a15b5f021559efe5f6 *inst/doc/sinc.hpp
 0c42355b3315761aec61a9ca4b5d0541 *inst/doc/stanfit-objects.R
 0306d8b5c85f075cb5e8548ca731694d *inst/doc/stanfit-objects.Rmd
-f9d9977252473f299b6f7b1a64d621ea *inst/doc/stanfit-objects.html
+b902776a5c485407d35a9643215df62f *inst/doc/stanfit-objects.html
 2c9a9e881170b315fdaf7e7be7ddde0d *inst/include/exporter.h
 2ef2f8e07d5cd9a9165a6ec4461f7f33 *inst/include/rstan/boost_random_R.hpp
 572b1c8c26c0b9a493586c8f0bd6f3b9 *inst/include/rstan/comment_writer.hpp
@@ -107,7 +107,7 @@ a24f2f1d6b8114345ba8093f16bea038 *man/rstan.package.skeleton.Rd
 83178231ce588f4a0479dc128fd0eb6b *man/stan_demo.Rd
 ebedf1ca95795b64806255d431e935c7 *man/stan_model.Rd
 2e9b0a820ff45444eedccb40e5413efa *man/stan_plot.Rd
-e6538ad8c754a560dbfa571ed8c4359b *man/stan_plot_diagnostics.Rd
+535ff27160ef49c8bc3677644b0ba2ff *man/stan_plot_diagnostics.Rd
 e3a73847d41559a655611f3fc6ec7365 *man/stan_plot_options.Rd
 e45a4b1e10f864cce83672e060daacdd *man/stan_rdump.Rd
 f5ff3f9c39d5296be792e06de36fc3f4 *man/stan_version.Rd
@@ -132,7 +132,7 @@ d12748b1b850113f1d9c039c137a854d *src/Makevars.win
 c438a5bd425d6aaba3fc4bfe2e1af285 *src/Module.cpp
 4d60be2695a7f74a194290f85d7a2a3b *src/chains.cpp
 e5cedf7c4ad222753015b43989461cc2 *src/init.cpp
-8ff3db9f70edca45b2cd42da02ee2cde *src/misc.cpp
+20e3e798314f19c7077a7153e9c2785d *src/misc.cpp
 3cfa3b3d8fc98f7f1dcc97b03526233e *src/pointer-tools.cpp
 b185b3c51967d866456814d578fe156e *src/sparse_extractors.cpp
 041bd15da265834e38a2aca15bd20803 *src/stan_fit.cpp

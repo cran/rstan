@@ -85,7 +85,7 @@ stanc_process <- function(file, model_code = '', model_name = "anon_model",
   model_code <- gsub('#include /(.*$)', '#include "\\1"', model_code)
   has_pound <- any(grepl("#", model_code, fixed = TRUE))
 
-  if (has_pound && isFALSE(auto_format)) {
+  if (FALSE && has_pound && isFALSE(auto_format)) {
     unprocessed <- tempfile(fileext = ".stan")
     processed <- tempfile(fileext = ".stan")
     on.exit(file.remove(unprocessed))

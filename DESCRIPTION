@@ -1,7 +1,7 @@
 Package: rstan
 Type: Package
 Title: R Interface to Stan
-Version: 2.32.6
+Version: 2.32.7
 Authors@R: c(person("Jiqiang", "Guo", email = "guojq28@gmail.com", role = "aut"),
              person("Jonah", "Gabry", email = "jsg2201@columbia.edu", role = "aut"),
              person("Ben", "Goodrich", email = "benjamin.goodrich@columbia.edu", role = c("cre", "aut")),
@@ -49,7 +49,7 @@ SystemRequirements: GNU make, pandoc
 Encoding: UTF-8
 RoxygenNote: 7.1.2
 Config/testthat/edition: 3
-Packaged: 2024-03-04 23:38:11 UTC; ben
+Packaged: 2025-03-10 04:53:43 UTC; ben
 Author: Jiqiang Guo [aut],
   Jonah Gabry [aut],
   Ben Goodrich [cre, aut],
@@ -70,4 +70,4 @@ Author: Jiqiang Guo [aut],
   Bronder Steve [ctb]
 Maintainer: Ben Goodrich <benjamin.goodrich@columbia.edu>
 Repository: CRAN
-Date/Publication: 2024-03-05 17:00:02 UTC
+Date/Publication: 2025-03-10 08:50:02 UTC
